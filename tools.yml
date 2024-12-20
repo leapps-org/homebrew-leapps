@@ -1,9 +1,0 @@
-tools:
-  - name: ileapp
-    repo: "https://github.com/abrignoni/iLEAPP"
-    binary: "ileapp"
-    class_name: "Ileapp"
-    cask_name: "ileapp-gui"
-    app_name: "iLEAPP GUI"
-    desc: "Digital forensics tool for parsing iOS backup files, images, and artifacts"
-    desc_gui: "Digital forensics tool for analyzing iOS artifacts with graphical interface"
