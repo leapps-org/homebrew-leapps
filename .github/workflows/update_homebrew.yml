@@ -11,17 +11,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Debug file presence
-        run: |
-          ls -la
-          cat tools.json
-
       - name: Process Tools
         run: |
-          # Parse tools from tools.json using jq
-          TOOLS=$(jq -c '.tools[]' tools.json)
-
-          for TOOL in $TOOLS; do
+          # Instead of storing all tools in a variable and then looping, 
+          # we directly read from jq output line by line.
+          while IFS= read -r TOOL; do
+            echo "Processing: $TOOL"
             NAME=$(echo "$TOOL" | jq -r '.name')
             REPO=$(echo "$TOOL" | jq -r '.repo')
             BINARY=$(echo "$TOOL" | jq -r '.binary')
@@ -93,7 +88,7 @@ jobs:
                 -e "s|{{homepage}}|$REPO|g" \
                 -e "s/{{app_bundle}}/${NAME}GUI/g" \
                 templates/cask_template.rb > Casks/$CASK_NAME.rb
-          done
+          done < <(jq -c '.tools[]' tools.json)
 
       - name: Brew Audit
         run: |
