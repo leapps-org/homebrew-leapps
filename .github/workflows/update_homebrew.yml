@@ -11,24 +11,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq yq
-
-      - name: Read Tools File
-        id: read_tools
-        run: |
-          # We'll convert YAML to JSON and print it for parsing
-          yq e -j . tools.yml > tools.json
-          echo "::set-output name=tools_json::$(cat tools.json)"
-
       - name: Process Tools
         run: |
-          # Parse tools.json
+          # Parse tools from tools.json using jq
           TOOLS=$(jq -c '.tools[]' tools.json)
 
-          # Iterate over each tool
           for TOOL in $TOOLS; do
             NAME=$(echo "$TOOL" | jq -r '.name')
             REPO=$(echo "$TOOL" | jq -r '.repo')
@@ -51,14 +38,14 @@ jobs:
             LATEST_GUI_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${LATEST_TAG}-Mac_Intel.dmg"
             LATEST_GUI_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${LATEST_TAG}-Apple_Silicon.dmg"
 
-            # Get current URLs (if formula or cask doesn't exist yet, set empty)
+            # Get current URLs (if formula/cask doesn't exist yet, set empty)
             CURRENT_INTEL_URL=$(grep -oP 'url "\K[^"]+' Formula/$NAME.rb 2>/dev/null || echo "")
             CURRENT_GUI_URL=$(grep -oP 'url "\K[^"]+' Casks/$CASK_NAME.rb 2>/dev/null || echo "")
 
             echo "Current Intel URL: $CURRENT_INTEL_URL"
             echo "Latest Intel URL: $LATEST_INTEL_URL"
 
-            # Compare URLs; skip if they are the same and not empty
+            # Compare URLs; skip if up-to-date
             if [ "$CURRENT_INTEL_URL" = "$LATEST_INTEL_URL" ] && [ -n "$CURRENT_INTEL_URL" ]; then
               echo "No update needed for $NAME."
               continue
@@ -101,7 +88,6 @@ jobs:
                 -e "s|{{homepage}}|$REPO|g" \
                 -e "s/{{app_bundle}}/${NAME}GUI/g" \
                 templates/cask_template.rb > Casks/$CASK_NAME.rb
-
           done
 
       - name: Brew Audit
