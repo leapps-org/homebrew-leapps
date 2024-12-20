@@ -29,7 +29,7 @@ jobs:
             echo "Processing $NAME from $REPO..."
 
             # Fetch the latest release tag
-            LATEST_TAG=$(curl -sL "$REPO/releases/latest" | grep -oP '(?<=tag/).*?(?=")')
+            LATEST_TAG=$(curl -s "https://api.github.com/repos/abrignoni/iLEAPP/releases/latest" | jq -r '.tag_name')
             echo "Latest tag: $LATEST_TAG"
 
             # Construct expected latest URLs
