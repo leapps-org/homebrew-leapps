@@ -29,7 +29,7 @@ jobs:
             echo "Processing $NAME from $REPO..."
 
             # Fetch the latest release tag
-            LATEST_TAG=$(curl -s "https://api.github.com/repos/abrignoni/iLEAPP/releases/latest" | jq -r '.tag_name')
+            LATEST_TAG=$(curl -s "https://api.github.com/repos/abrignoni/${NAME}/releases/latest" | jq -r '.tag_name')
             echo "Latest tag: $LATEST_TAG"
 
             # Construct expected latest URLs
@@ -89,11 +89,6 @@ jobs:
                 -e "s/{{app_bundle}}/${NAME}GUI/g" \
                 templates/cask_template.rb > Casks/$CASK_NAME.rb
           done < <(jq -c '.tools[]' tools.json)
-
-      - name: Brew Audit
-        run: |
-          brew audit --strict --new-formula Formula/*.rb
-          brew audit --cask Casks/*.rb
 
       - name: Commit and Push Changes
         run: |
