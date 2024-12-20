@@ -1,0 +1,122 @@
+name: Update Homebrew Formulae and Casks
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-formulae:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq yq
+
+      - name: Read Tools File
+        id: read_tools
+        run: |
+          # We'll convert YAML to JSON and print it for parsing
+          yq e -j . tools.yml > tools.json
+          echo "::set-output name=tools_json::$(cat tools.json)"
+
+      - name: Process Tools
+        run: |
+          # Parse tools.json
+          TOOLS=$(jq -c '.tools[]' tools.json)
+
+          # Iterate over each tool
+          for TOOL in $TOOLS; do
+            NAME=$(echo "$TOOL" | jq -r '.name')
+            REPO=$(echo "$TOOL" | jq -r '.repo')
+            BINARY=$(echo "$TOOL" | jq -r '.binary')
+            CLASS_NAME=$(echo "$TOOL" | jq -r '.class_name')
+            CASK_NAME=$(echo "$TOOL" | jq -r '.cask_name')
+            APP_NAME=$(echo "$TOOL" | jq -r '.app_name')
+            DESC=$(echo "$TOOL" | jq -r '.desc')
+            DESC_GUI=$(echo "$TOOL" | jq -r '.desc_gui')
+
+            echo "Processing $NAME from $REPO..."
+
+            # Fetch the latest release tag
+            LATEST_TAG=$(curl -sL "$REPO/releases/latest" | grep -oP '(?<=tag/).*?(?=")')
+            echo "Latest tag: $LATEST_TAG"
+
+            # Construct expected latest URLs
+            LATEST_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG}-Mac_Intel.zip"
+            LATEST_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG}-Apple_Silicon.zip"
+            LATEST_GUI_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${LATEST_TAG}-Mac_Intel.dmg"
+            LATEST_GUI_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${LATEST_TAG}-Apple_Silicon.dmg"
+
+            # Get current URLs (if formula or cask doesn't exist yet, set empty)
+            CURRENT_INTEL_URL=$(grep -oP 'url "\K[^"]+' Formula/$NAME.rb 2>/dev/null || echo "")
+            CURRENT_GUI_URL=$(grep -oP 'url "\K[^"]+' Casks/$CASK_NAME.rb 2>/dev/null || echo "")
+
+            echo "Current Intel URL: $CURRENT_INTEL_URL"
+            echo "Latest Intel URL: $LATEST_INTEL_URL"
+
+            # Compare URLs; skip if they are the same and not empty
+            if [ "$CURRENT_INTEL_URL" = "$LATEST_INTEL_URL" ] && [ -n "$CURRENT_INTEL_URL" ]; then
+              echo "No update needed for $NAME."
+              continue
+            fi
+
+            echo "Updating $NAME to $LATEST_TAG..."
+
+            # Download assets
+            curl -L -o intel.zip "$LATEST_INTEL_URL"
+            curl -L -o arm.zip "$LATEST_ARM_URL"
+            curl -L -o gui_intel.dmg "$LATEST_GUI_INTEL_URL"
+            curl -L -o gui_arm.dmg "$LATEST_GUI_ARM_URL"
+
+            # Calculate checksums
+            INTEL_SHA=$(shasum -a 256 intel.zip | awk '{print $1}')
+            ARM_SHA=$(shasum -a 256 arm.zip | awk '{print $1}')
+            GUI_INTEL_SHA=$(shasum -a 256 gui_intel.dmg | awk '{print $1}')
+            GUI_ARM_SHA=$(shasum -a 256 gui_arm.dmg | awk '{print $1}')
+
+            # Update formula from template
+            sed -e "s/{{ClassName}}/$CLASS_NAME/g" \
+                -e "s/{{desc}}/$DESC/g" \
+                -e "s|{{homepage}}|$REPO|g" \
+                -e "s|{{intel_url}}|$LATEST_INTEL_URL|g" \
+                -e "s|{{arm_url}}|$LATEST_ARM_URL|g" \
+                -e "s/{{intel_sha}}/$INTEL_SHA/g" \
+                -e "s/{{arm_sha}}/$ARM_SHA/g" \
+                -e "s/{{binary_name}}/$BINARY/g" \
+                templates/formula_template.rb > Formula/$NAME.rb
+
+            # Update cask from template
+            sed -e "s/{{cask_name}}/$CASK_NAME/g" \
+                -e "s/{{version}}/$LATEST_TAG/g" \
+                -e "s|{{gui_intel_url}}|$LATEST_GUI_INTEL_URL|g" \
+                -e "s|{{gui_arm_url}}|$LATEST_GUI_ARM_URL|g" \
+                -e "s/{{gui_intel_sha}}/$GUI_INTEL_SHA/g" \
+                -e "s/{{gui_arm_sha}}/$GUI_ARM_SHA/g" \
+                -e "s/{{app_name}}/$APP_NAME/g" \
+                -e "s/{{desc_gui}}/$DESC_GUI/g" \
+                -e "s|{{homepage}}|$REPO|g" \
+                -e "s/{{app_bundle}}/${NAME}GUI/g" \
+                templates/cask_template.rb > Casks/$CASK_NAME.rb
+
+          done
+
+      - name: Brew Audit
+        run: |
+          brew audit --strict --new-formula Formula/*.rb
+          brew audit --cask Casks/*.rb
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add Formula/*.rb Casks/*.rb
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Update Homebrew formulae and casks for latest versions"
+            git push
+          else
+            echo "No changes to commit."
+          fi
