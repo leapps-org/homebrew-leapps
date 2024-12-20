@@ -3,6 +3,9 @@ name: Update Homebrew Formulae and Casks
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update-formulae:
     runs-on: ubuntu-latest
