@@ -1,0 +1,36 @@
+tools:
+  - name: ileapp
+    repo: "https://github.com/abrignoni/iLEAPP"
+    binary: "ileapp"
+    class_name: "Ileapp"
+    cask_name: "ileapp-gui"
+    app_name: "iLEAPP GUI"
+    desc: "Digital forensics tool for parsing iOS backup files, images, and artifacts"
+    desc_gui: "Digital forensics tool for analyzing iOS artifacts with graphical interface"
+
+  - name: aleapp
+    repo: "https://github.com/abrignoni/aLEAPP"
+    binary: "aleapp"
+    class_name: "Aleapp"
+    cask_name: "aleapp-gui"
+    app_name: "aLEAPP GUI"
+    desc: "Digital forensics tool for Android backup files, images, and artifacts"
+    desc_gui: "Digital forensics tool for analyzing Android artifacts with graphical interface"
+
+  - name: vleapp
+    repo: "https://github.com/abrignoni/vLEAPP"
+    binary: "vleapp"
+    class_name: "Vleapp"
+    cask_name: "vleapp-gui"
+    app_name: "vLEAPP GUI"
+    desc: "Digital forensics tool for data from vehicles"
+    desc_gui: "Digital forensics tool for analyzing vehicle data with graphical interface"
+
+  - name: tleapp
+    repo: "https://github.com/abrignoni/tLEAPP"
+    binary: "tleapp"
+    class_name: "Tleapp"
+    cask_name: "tleapp-gui"
+    app_name: "tLEAPP GUI"
+    desc: "Digital forensics tool for Windows Timeline files and artifacts"
+    desc_gui: "Digital forensics tool for analyzing Windows Timeline data with graphical interface"
