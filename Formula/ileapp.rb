@@ -3,11 +3,11 @@ class Ileapp < Formula
   homepage "https://github.com/abrignoni/iLEAPP"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/iLEAPP/releases/download/v2.0.2/ileapp-v2.0.2-Mac_Intel.zip"
-    sha256 "1a2fc616f48a5499ae04b0c5d9beab0912b278d3b09bf3e5ce0650d67394e5c8"
+    url "https://github.com/abrignoni/iLEAPP/releases/download/v2.0.4/ileapp-v2.0.4-Mac_Intel.zip"
+    sha256 "5c2bbcb044cbac55e008a4d46b9647a06e742365b2fdd7cb37e53bdc52b99dd6"
   else
-    url "https://github.com/abrignoni/iLEAPP/releases/download/v2.0.2/ileapp-v2.0.2-Apple_Silicon.zip"
-    sha256 "4bba124a84e475cae32241223714024ee121ed8579a82ac4ae2a8b7e71743e7c"
+    url "https://github.com/abrignoni/iLEAPP/releases/download/v2.0.4/ileapp-v2.0.4-Apple_Silicon.zip"
+    sha256 "ee724cba72faf14231d03b0965fa097760181cd6618cecfb2caa4ba4c5182b1b"
   end
 
   def install
