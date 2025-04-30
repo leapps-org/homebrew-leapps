@@ -16,10 +16,13 @@ jobs:
 
       - name: Process Tools
         run: |
-          # Instead of storing all tools in a variable and then looping, 
+          set -eo pipefail # Exit immediately if a command exits with a non-zero status.
+
+          # Instead of storing all tools in a variable and then looping,
           # we directly read from jq output line by line.
           while IFS= read -r TOOL; do
-            echo "Processing: $TOOL"
+            echo "--- Processing Tool ---"
+            # Extract tool details using jq
             NAME=$(echo "$TOOL" | jq -r '.name')
             REPO=$(echo "$TOOL" | jq -r '.repo')
             BINARY=$(echo "$TOOL" | jq -r '.binary')
@@ -29,46 +32,90 @@ jobs:
             DESC=$(echo "$TOOL" | jq -r '.desc')
             DESC_GUI=$(echo "$TOOL" | jq -r '.desc_gui')
 
-            echo "Processing $NAME from $REPO..."
+            echo "Name: $NAME"
+            echo "Repo: $REPO"
+            echo "Binary: $BINARY"
+            echo "Class Name: $CLASS_NAME"
+            echo "Cask Name: $CASK_NAME"
+            echo "App Name: $APP_NAME"
 
             # Fetch the latest release tag
-            LATEST_TAG=$(curl -s "https://api.github.com/repos/abrignoni/${NAME}/releases/latest" | jq -r '.tag_name')
-            echo "Latest tag: $LATEST_TAG"
+            echo "Fetching latest tag for $REPO..."
+            LATEST_TAG=$(curl -fsSL "https://api.github.com/repos/abrignoni/${NAME}/releases/latest" | jq -r '.tag_name')
+            if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "null" ]; then
+              echo "ERROR: Could not fetch latest tag for $NAME. Skipping."
+              continue # Skip to the next tool
+            fi
+            echo "Latest tag found: $LATEST_TAG"
 
             # Construct expected latest URLs
             LATEST_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG}-Mac_Intel.zip"
             LATEST_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG}-Apple_Silicon.zip"
             LATEST_GUI_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${LATEST_TAG}-Mac_Intel.dmg"
             LATEST_GUI_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${LATEST_TAG}-Apple_Silicon.dmg"
+            echo "Constructed Latest URLs:"
+            echo "  Intel CLI: $LATEST_INTEL_URL"
+            echo "  ARM CLI: $LATEST_ARM_URL"
+            echo "  Intel GUI: $LATEST_GUI_INTEL_URL"
+            echo "  ARM GUI: $LATEST_GUI_ARM_URL"
 
             # Get current URLs (if formula/cask doesn't exist yet, set empty)
-            CURRENT_INTEL_URL=$(grep -oP 'url "\K[^"]+' Formula/$NAME.rb 2>/dev/null || echo "")
-            CURRENT_GUI_URL=$(grep -oP 'url "\K[^"]+' Casks/$CASK_NAME.rb 2>/dev/null || echo "")
+            FORMULA_PATH="Formula/$NAME.rb"
+            CASK_PATH="Casks/$CASK_NAME.rb"
+            CURRENT_INTEL_URL=""
+            CURRENT_GUI_URL=""
 
-            echo "Current Intel URL: $CURRENT_INTEL_URL"
-            echo "Latest Intel URL: $LATEST_INTEL_URL"
+            echo "Checking current formula at $FORMULA_PATH..."
+            if [ -f "$FORMULA_PATH" ]; then
+              CURRENT_INTEL_URL=$(grep -oP 'url "\K[^"]+' "$FORMULA_PATH" || echo "")
+              echo "Found current Intel URL: $CURRENT_INTEL_URL"
+            else
+              echo "Formula file not found. Assuming new tool."
+            fi
 
-            # Compare URLs; skip if up-to-date
-            if [ "$CURRENT_INTEL_URL" = "$LATEST_INTEL_URL" ] && [ -n "$CURRENT_INTEL_URL" ]; then
-              echo "No update needed for $NAME."
+            echo "Checking current cask at $CASK_PATH..."
+            if [ -f "$CASK_PATH" ]; then
+              CURRENT_GUI_URL=$(grep -oP 'url "\K[^"]+' "$CASK_PATH" || echo "")
+              echo "Found current GUI URL: $CURRENT_GUI_URL"
+            else
+              echo "Cask file not found. Assuming new tool."
+            fi
+
+            # Compare URLs; skip if up-to-date (Only checking CLI for simplicity, adjust if needed)
+            # Also ensure the formula file exists before declaring it up-to-date
+            if [ -f "$FORMULA_PATH" ] && [ "$CURRENT_INTEL_URL" = "$LATEST_INTEL_URL" ]; then
+              echo "$NAME formula is already up-to-date ($LATEST_TAG). Skipping."
+              # Consider adding a similar check for the GUI cask if necessary
               continue
             fi
 
-            echo "Updating $NAME to $LATEST_TAG..."
+            echo "Update required for $NAME ($CURRENT_INTEL_URL -> $LATEST_INTEL_URL). Proceeding..."
 
-            # Download assets
-            curl -L -o intel.zip "$LATEST_INTEL_URL"
-            curl -L -o arm.zip "$LATEST_ARM_URL"
-            curl -L -o gui_intel.dmg "$LATEST_GUI_INTEL_URL"
-            curl -L -o gui_arm.dmg "$LATEST_GUI_ARM_URL"
+            # Download assets - Using -f to fail fast on 404s
+            echo "Downloading Intel CLI..."
+            curl -fL -o intel.zip "$LATEST_INTEL_URL"
+            echo "Downloading ARM CLI..."
+            curl -fL -o arm.zip "$LATEST_ARM_URL"
+            echo "Downloading Intel GUI..."
+            curl -fL -o gui_intel.dmg "$LATEST_GUI_INTEL_URL"
+            echo "Downloading ARM GUI..."
+            curl -fL -o gui_arm.dmg "$LATEST_GUI_ARM_URL"
+            echo "Downloads complete."
 
             # Calculate checksums
+            echo "Calculating checksums..."
             INTEL_SHA=$(shasum -a 256 intel.zip | awk '{print $1}')
             ARM_SHA=$(shasum -a 256 arm.zip | awk '{print $1}')
             GUI_INTEL_SHA=$(shasum -a 256 gui_intel.dmg | awk '{print $1}')
             GUI_ARM_SHA=$(shasum -a 256 gui_arm.dmg | awk '{print $1}')
+            echo "SHA256 Hashes:"
+            echo "  Intel CLI: $INTEL_SHA"
+            echo "  ARM CLI: $ARM_SHA"
+            echo "  Intel GUI: $GUI_INTEL_SHA"
+            echo "  ARM GUI: $GUI_ARM_SHA"
 
             # Update formula from template
+            echo "Generating formula file: $FORMULA_PATH"
             sed -e "s/{{ClassName}}/$CLASS_NAME/g" \
                 -e "s/{{desc}}/$DESC/g" \
                 -e "s|{{homepage}}|$REPO|g" \
@@ -77,9 +124,10 @@ jobs:
                 -e "s/{{intel_sha}}/$INTEL_SHA/g" \
                 -e "s/{{arm_sha}}/$ARM_SHA/g" \
                 -e "s/{{binary_name}}/$BINARY/g" \
-                templates/formula_template.rb > Formula/$NAME.rb
+                templates/formula_template.rb > "$FORMULA_PATH"
 
             # Update cask from template
+            echo "Generating cask file: $CASK_PATH"
             sed -e "s/{{cask_name}}/$CASK_NAME/g" \
                 -e "s/{{version}}/$LATEST_TAG/g" \
                 -e "s|{{gui_intel_url}}|$LATEST_GUI_INTEL_URL|g" \
@@ -90,8 +138,15 @@ jobs:
                 -e "s/{{desc_gui}}/$DESC_GUI/g" \
                 -e "s|{{homepage}}|$REPO|g" \
                 -e "s/{{app_bundle}}/${NAME}GUI/g" \
-                templates/cask_template.rb > Casks/$CASK_NAME.rb
+                templates/cask_template.rb > "$CASK_PATH"
+
+            # Clean up downloaded files
+            echo "Cleaning up temporary files..."
+            rm -f intel.zip arm.zip gui_intel.dmg gui_arm.dmg
+
+            echo "Finished processing $NAME."
           done < <(jq -c '.tools[]' tools.json)
+          echo "--- All tools processed ---"
 
       - name: Commit and Push Changes
         run: |
