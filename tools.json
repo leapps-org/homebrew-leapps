@@ -9,6 +9,16 @@
       "app_name": "iLEAPP GUI",
       "desc": "Digital forensics tool for parsing iOS backup files, images, and artifacts",
       "desc_gui": "Digital forensics tool for analyzing iOS artifacts with graphical interface"
+    },
+    {
+      "name": "aleapp",
+      "repo": "https://github.com/abrignoni/aLEAPP",
+      "binary": "aleapp",
+      "class_name": "Aleapp",
+      "cask_name": "aleapp-gui",
+      "app_name": "aLEAPP GUI",
+      "desc": "Digital forensics tool for parsing Android backup files, images, and artifacts",
+      "desc_gui": "Digital forensics tool for analyzing Android artifacts with graphical interface"
     }
   ]
 }
