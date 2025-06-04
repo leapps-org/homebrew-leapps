@@ -19,6 +19,26 @@
       "app_name": "aLEAPP GUI",
       "desc": "Digital forensics tool for parsing Android backup files, images, and artifacts",
       "desc_gui": "Digital forensics tool for analyzing Android artifacts with graphical interface"
+    },
+    {
+      "name": "rleapp",
+      "repo": "https://github.com/abrignoni/RLEAPP",
+      "binary": "rleapp",
+      "class_name": "Rleapp",
+      "cask_name": "rleapp-gui",
+      "app_name": "RLEAPP GUI",
+      "desc": "Digital forensics tool for parsing service provider warrant / data return files",
+      "desc_gui": "Digital forensics tool for parsing service provider warrant / data return files with graphical interface"
+    },
+    {
+      "name": "vleapp",
+      "repo": "https://github.com/abrignoni/VLEAPP",
+      "binary": "vleapp",
+      "class_name": "Vleapp",
+      "cask_name": "vleapp-gui",
+      "app_name": "VLEAPP GUI",
+      "desc": "Digital forensics tool for parsing vehicle infotainment system backup files, images, and artifacts",
+      "desc_gui": "Digital forensics tool for analyzing vehicle infotainment system artifacts with graphical interface"
     }
   ]
 }
