@@ -50,11 +50,32 @@ jobs:
             fi
             echo "Latest tag found: $LATEST_TAG"
 
+            # The tag in the release's asset filenames might not have the 'v' prefix.
+            # We'll check which URL pattern is correct by checking for one of the assets.
+            LATEST_TAG_NO_V=${LATEST_TAG#v}
+            TAG_IN_FILENAME=""
+
+            URL_WITH_V="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG}-Mac_Intel.zip"
+            URL_WITHOUT_V="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG_NO_V}-Mac_Intel.zip"
+
+            echo "Checking for asset URL format by probing for Intel CLI asset..."
+            if curl -fL --output /dev/null --silent --head "$URL_WITH_V"; then
+              echo "Found asset filenames with 'v' prefix (e.g., ...-${LATEST_TAG}-...)."
+              TAG_IN_FILENAME=$LATEST_TAG
+            elif curl -fL --output /dev/null --silent --head "$URL_WITHOUT_V"; then
+              echo "Found asset filenames without 'v' prefix (e.g., ...-${LATEST_TAG_NO_V}-...)."
+              TAG_IN_FILENAME=$LATEST_TAG_NO_V
+            else
+              echo "ERROR: Could not determine release asset URL pattern for $NAME ($LATEST_TAG)."
+              echo "Tried with and without 'v' prefix in filename. Skipping tool."
+              continue
+            fi
+
             # Construct expected latest URLs
-            LATEST_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG}-Mac_Intel.zip"
-            LATEST_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG}-Apple_Silicon.zip"
-            LATEST_GUI_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${LATEST_TAG}-Mac_Intel.dmg"
-            LATEST_GUI_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${LATEST_TAG}-Apple_Silicon.dmg"
+            LATEST_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${TAG_IN_FILENAME}-Mac_Intel.zip"
+            LATEST_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${TAG_IN_FILENAME}-Apple_Silicon.zip"
+            LATEST_GUI_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${TAG_IN_FILENAME}-Mac_Intel.dmg"
+            LATEST_GUI_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${TAG_IN_FILENAME}-Apple_Silicon.dmg"
             echo "Constructed Latest URLs:"
             echo "  Intel CLI: $LATEST_INTEL_URL"
             echo "  ARM CLI: $LATEST_ARM_URL"
@@ -69,7 +90,7 @@ jobs:
 
             echo "Checking current formula at $FORMULA_PATH..."
             if [ -f "$FORMULA_PATH" ]; then
-              CURRENT_INTEL_URL=$(grep -oP 'url "\K[^"]+' "$FORMULA_PATH" || echo "")
+              CURRENT_INTEL_URL=$(grep -oP 'url "\K[^"]+' "$FORMULA_PATH" | head -n 1 || echo "")
               echo "Found current Intel URL: $CURRENT_INTEL_URL"
             else
               echo "Formula file not found. Assuming new tool."
@@ -77,21 +98,19 @@ jobs:
 
             echo "Checking current cask at $CASK_PATH..."
             if [ -f "$CASK_PATH" ]; then
-              CURRENT_GUI_URL=$(grep -oP 'url "\K[^"]+' "$CASK_PATH" || echo "")
+              CURRENT_GUI_URL=$(grep -oP 'url "\K[^"]+' "$CASK_PATH" | head -n 1 || echo "")
               echo "Found current GUI URL: $CURRENT_GUI_URL"
             else
               echo "Cask file not found. Assuming new tool."
             fi
 
-            # Compare URLs; skip if up-to-date (Only checking CLI for simplicity, adjust if needed)
-            # Also ensure the formula file exists before declaring it up-to-date
-            if [ -f "$FORMULA_PATH" ] && [ "$CURRENT_INTEL_URL" = "$LATEST_INTEL_URL" ]; then
-              echo "$NAME formula is already up-to-date ($LATEST_TAG). Skipping."
-              # Consider adding a similar check for the GUI cask if necessary
+            # Compare URLs; skip if both formula and cask are present and up-to-date
+            if [ -f "$FORMULA_PATH" ] && [ -f "$CASK_PATH" ] && [ "$CURRENT_INTEL_URL" = "$LATEST_INTEL_URL" ] && [ "$CURRENT_GUI_URL" = "$LATEST_GUI_INTEL_URL" ]; then
+              echo "$NAME formula and cask are already up-to-date ($LATEST_TAG). Skipping."
               continue
             fi
 
-            echo "Update required for $NAME ($CURRENT_INTEL_URL -> $LATEST_INTEL_URL). Proceeding..."
+            echo "Update required for $NAME. Proceeding..."
 
             # Download assets - Using -f to fail fast on 404s
             echo "Downloading Intel CLI..."
