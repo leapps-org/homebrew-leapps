@@ -27,8 +27,8 @@
       "class_name": "Rleapp",
       "cask_name": "rleapp-gui",
       "app_name": "RLEAPP GUI",
-      "desc": "Digital forensics tool for parsing service provider warrant / data return files",
-      "desc_gui": "Digital forensics tool for parsing service provider warrant / data return files with graphical interface"
+      "desc": "Digital forensics tool for parsing service provider warrant or data return files",
+      "desc_gui": "Digital forensics tool for parsing service provider warrant or data return files with graphical interface"
     },
     {
       "name": "vleapp",
