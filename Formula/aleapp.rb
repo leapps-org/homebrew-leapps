@@ -3,11 +3,11 @@ class Aleapp < Formula
   homepage "https://github.com/abrignoni/aLEAPP"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/aLEAPP/releases/download/v3.4.0/aleapp-v3.4.0-Mac_Intel.zip"
-    sha256 "0a1188bbe9f94a77a24c1f5dc7ff804e24e266f1ceaf13958e92ac4eb391d1a3"
+    url "https://github.com/abrignoni/aLEAPP/releases/download/v3.4.1/aleapp-v3.4.1-Mac_Intel.zip"
+    sha256 "c1b52dd4375dd849c5f5ae3f99a0b61af95c5a9f43a3b772d712347593106c8e"
   else
-    url "https://github.com/abrignoni/aLEAPP/releases/download/v3.4.0/aleapp-v3.4.0-Apple_Silicon.zip"
-    sha256 "96ddf4b8d0efe645e21750ccf6c270dec9926f01a2e15b262bcd29b42c454ba3"
+    url "https://github.com/abrignoni/aLEAPP/releases/download/v3.4.1/aleapp-v3.4.1-Apple_Silicon.zip"
+    sha256 "7f8d30b66509dfc59db14a30fa765a797ca94f21ee3ca44baf92b7aa94c2d315"
   end
 
   def install
