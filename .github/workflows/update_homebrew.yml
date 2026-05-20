@@ -55,8 +55,8 @@ jobs:
             LATEST_TAG_NO_V=${LATEST_TAG#v}
             TAG_IN_FILENAME=""
 
-            URL_WITH_V="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG}-Mac_Intel.zip"
-            URL_WITHOUT_V="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG_NO_V}-Mac_Intel.zip"
+            URL_WITH_V="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG}-macOS_Mac_Intel.zip"
+            URL_WITHOUT_V="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG_NO_V}-macOS_Mac_Intel.zip"
 
             echo "Checking for asset URL format by probing for Intel CLI asset..."
             if curl -fL --output /dev/null --silent --head "$URL_WITH_V"; then
@@ -72,10 +72,10 @@ jobs:
             fi
 
             # Construct expected latest URLs
-            LATEST_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${TAG_IN_FILENAME}-Mac_Intel.zip"
-            LATEST_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${TAG_IN_FILENAME}-Apple_Silicon.zip"
-            LATEST_GUI_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${TAG_IN_FILENAME}-Mac_Intel.dmg"
-            LATEST_GUI_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${TAG_IN_FILENAME}-Apple_Silicon.dmg"
+            LATEST_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${TAG_IN_FILENAME}-macOS_Mac_Intel.zip"
+            LATEST_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${TAG_IN_FILENAME}-macOS_Apple_Silicon.zip"
+            LATEST_GUI_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${TAG_IN_FILENAME}-macOS_Mac_Intel.dmg"
+            LATEST_GUI_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${TAG_IN_FILENAME}-macOS_Apple_Silicon.dmg"
             echo "Constructed Latest URLs:"
             echo "  Intel CLI: $LATEST_INTEL_URL"
             echo "  ARM CLI: $LATEST_ARM_URL"
