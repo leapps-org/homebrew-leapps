@@ -3,11 +3,11 @@ class Vleapp < Formula
   homepage "https://github.com/abrignoni/VLEAPP"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/VLEAPP/releases/download/v2.1.2/vleapp-2.1.2-Mac_Intel.zip"
-    sha256 "12fcc583ca0220bcaa9eb8f5a73a939742b78b3d4606fcf038c0beda61ffd4e5"
+    url "https://github.com/abrignoni/VLEAPP/releases/download/v2.2.0/vleapp-v2.2.0-macOS_Mac_Intel.zip"
+    sha256 "6d8e1421f1342c8536218cb21d743a60b78ef02271b5a9dd62eb14c9ecd4733d"
   else
-    url "https://github.com/abrignoni/VLEAPP/releases/download/v2.1.2/vleapp-2.1.2-Apple_Silicon.zip"
-    sha256 "91eaf8543c9eff4ff016e4cf58af1e9f7c4065ea8913f8e271b179285ebab3d4"
+    url "https://github.com/abrignoni/VLEAPP/releases/download/v2.2.0/vleapp-v2.2.0-macOS_Apple_Silicon.zip"
+    sha256 "d89a192ab7771acf76459e4297460ceef242d8c177b95b5ebc361d42e5397894"
   end
 
   def install

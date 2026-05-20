@@ -1,12 +1,12 @@
 cask "ileapp-gui" do
-  version "v2.3.1"
+  version "v2.4.0"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/iLEAPP/releases/download/v2.3.1/ileappGUI-v2.3.1-Mac_Intel.dmg"
-    sha256 "b9e929bdc26267839d74e15a7c68f2de0c66eb63c47ec488a7611b7573e811cb"
+    url "https://github.com/abrignoni/iLEAPP/releases/download/v2.4.0/ileappGUI-v2.4.0-macOS_Mac_Intel.dmg"
+    sha256 "a49dbcb6569bb2b142d528631cdb70436b324d1f998b4053e8e406d9fc5adc77"
   else
-    url "https://github.com/abrignoni/iLEAPP/releases/download/v2.3.1/ileappGUI-v2.3.1-Apple_Silicon.dmg"
-    sha256 "d9a5a2019c69e38167a0568acd12c9c4e98a2e4f5a600f0306af6c772d6ae745"
+    url "https://github.com/abrignoni/iLEAPP/releases/download/v2.4.0/ileappGUI-v2.4.0-macOS_Apple_Silicon.dmg"
+    sha256 "cd608af04a2aff79541fe18e8bcaed8aa4d66781f7d8d85883b7be68a8af4c42"
   end
 
   name "iLEAPP GUI"
