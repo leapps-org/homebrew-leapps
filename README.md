@@ -11,6 +11,7 @@ Tools for parsing and analyzing mobile device data:
 - [ALEAPP](https://github.com/abrignoni/ALEAPP) - Android Logs, Events, And Protobuf Parser
 - [VLEAPP](https://github.com/abrignoni/VLEAPP) - Vehicle Logs, Events, And Protobuf Parser
 - [RLEAPP](https://github.com/abrignoni/RLEAPP) - Warrant Returns Parser
+- [LAVA](https://github.com/leapps-org/LAVA-releases) - LEAPP Artifact Viewer App
 
 ## Installation
 
