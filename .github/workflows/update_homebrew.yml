@@ -27,12 +27,15 @@ jobs:
             # Extract tool details using jq
             NAME=$(echo "$TOOL" | jq -r '.name')
             REPO=$(echo "$TOOL" | jq -r '.repo')
-            BINARY=$(echo "$TOOL" | jq -r '.binary')
-            CLASS_NAME=$(echo "$TOOL" | jq -r '.class_name')
-            CASK_NAME=$(echo "$TOOL" | jq -r '.cask_name')
-            APP_NAME=$(echo "$TOOL" | jq -r '.app_name')
-            DESC=$(echo "$TOOL" | jq -r '.desc')
-            DESC_GUI=$(echo "$TOOL" | jq -r '.desc_gui')
+            BINARY=$(echo "$TOOL" | jq -r '.binary // ""')
+            CLASS_NAME=$(echo "$TOOL" | jq -r '.class_name // ""')
+            CASK_NAME=$(echo "$TOOL" | jq -r '.cask_name // ""')
+            APP_NAME=$(echo "$TOOL" | jq -r '.app_name // ""')
+            APP_BUNDLE=$(echo "$TOOL" | jq -r ".app_bundle // \"${NAME}GUI\"")
+            DESC=$(echo "$TOOL" | jq -r '.desc // ""')
+            DESC_GUI=$(echo "$TOOL" | jq -r '.desc_gui // ""')
+            DO_FORMULA=$(echo "$TOOL" | jq -r '.formula // true')
+            DO_CASK=$(echo "$TOOL" | jq -r '.cask // true')
 
             echo "Name: $NAME"
             echo "Repo: $REPO"
@@ -40,47 +43,122 @@ jobs:
             echo "Class Name: $CLASS_NAME"
             echo "Cask Name: $CASK_NAME"
             echo "App Name: $APP_NAME"
+            echo "Formula enabled: $DO_FORMULA"
+            echo "Cask enabled: $DO_CASK"
 
             # Fetch the latest release tag
+            OWNER_REPO=$(echo "$REPO" | sed -E 's#^https://github.com/##; s#/$##')
             echo "Fetching latest tag for $REPO..."
-            LATEST_TAG=$(curl -fsSL "https://api.github.com/repos/abrignoni/${NAME}/releases/latest" | jq -r '.tag_name')
+            RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${OWNER_REPO}/releases/latest")
+            LATEST_TAG=$(echo "$RELEASE_JSON" | jq -r '.tag_name')
             if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "null" ]; then
               echo "ERROR: Could not fetch latest tag for $NAME. Skipping."
               continue # Skip to the next tool
             fi
             echo "Latest tag found: $LATEST_TAG"
 
-            # The tag in the release's asset filenames might not have the 'v' prefix.
-            # We'll check which URL pattern is correct by checking for one of the assets.
             LATEST_TAG_NO_V=${LATEST_TAG#v}
-            TAG_IN_FILENAME=""
 
-            URL_WITH_V="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG}-macOS_Mac_Intel.zip"
-            URL_WITHOUT_V="$REPO/releases/download/$LATEST_TAG/${NAME}-${LATEST_TAG_NO_V}-macOS_Mac_Intel.zip"
+            render_asset_name() {
+              local template="$1"
+              echo "$template" | sed \
+                -e "s/{{name}}/$NAME/g" \
+                -e "s/{{version}}/$LATEST_TAG/g" \
+                -e "s/{{version_no_v}}/$LATEST_TAG_NO_V/g"
+            }
 
-            echo "Checking for asset URL format by probing for Intel CLI asset..."
-            if curl -fL --output /dev/null --silent --head "$URL_WITH_V"; then
-              echo "Found asset filenames with 'v' prefix (e.g., ...-${LATEST_TAG}-...)."
-              TAG_IN_FILENAME=$LATEST_TAG
-            elif curl -fL --output /dev/null --silent --head "$URL_WITHOUT_V"; then
-              echo "Found asset filenames without 'v' prefix (e.g., ...-${LATEST_TAG_NO_V}-...)."
-              TAG_IN_FILENAME=$LATEST_TAG_NO_V
-            else
-              echo "ERROR: Could not determine release asset URL pattern for $NAME ($LATEST_TAG)."
-              echo "Tried with and without 'v' prefix in filename. Skipping tool."
+            asset_exists() {
+              local asset_name="$1"
+              echo "$RELEASE_JSON" | jq -e --arg asset_name "$asset_name" '.assets[] | select(.name == $asset_name)' >/dev/null
+            }
+
+            select_asset_name() {
+              local field="$1"
+              local default_with_v="$2"
+              local default_without_v="$3"
+              local configured
+              configured=$(echo "$TOOL" | jq -r --arg field "$field" '.[$field] // ""')
+
+              if [ -n "$configured" ]; then
+                render_asset_name "$configured"
+                return
+              fi
+
+              local candidate_with_v candidate_without_v
+              candidate_with_v=$(render_asset_name "$default_with_v")
+              candidate_without_v=$(render_asset_name "$default_without_v")
+
+              if asset_exists "$candidate_with_v"; then
+                echo "$candidate_with_v"
+              elif asset_exists "$candidate_without_v"; then
+                echo "$candidate_without_v"
+              else
+                echo ""
+              fi
+            }
+
+            asset_url() {
+              local asset_name="$1"
+              echo "$RELEASE_JSON" | jq -r --arg asset_name "$asset_name" '.assets[] | select(.name == $asset_name) | .browser_download_url'
+            }
+
+            asset_sha() {
+              local asset_name="$1"
+              local url="$2"
+              local tmp_file="$3"
+              local digest
+              digest=$(echo "$RELEASE_JSON" | jq -r --arg asset_name "$asset_name" '.assets[] | select(.name == $asset_name) | .digest // ""')
+              if [[ "$digest" == sha256:* ]]; then
+                echo "${digest#sha256:}"
+              else
+                curl -fL -o "$tmp_file" "$url"
+                shasum -a 256 "$tmp_file" | awk '{print $1}'
+              fi
+            }
+
+            INTEL_ASSET=""
+            ARM_ASSET=""
+            GUI_INTEL_ASSET=""
+            GUI_ARM_ASSET=""
+            LATEST_INTEL_URL=""
+            LATEST_ARM_URL=""
+            LATEST_GUI_INTEL_URL=""
+            LATEST_GUI_ARM_URL=""
+
+            if [ "$DO_FORMULA" = "true" ]; then
+              INTEL_ASSET=$(select_asset_name "intel_asset" "{{name}}-{{version}}-macOS_Mac_Intel.zip" "{{name}}-{{version_no_v}}-macOS_Mac_Intel.zip")
+              ARM_ASSET=$(select_asset_name "arm_asset" "{{name}}-{{version}}-macOS_Apple_Silicon.zip" "{{name}}-{{version_no_v}}-macOS_Apple_Silicon.zip")
+              if [ -z "$INTEL_ASSET" ] || [ -z "$ARM_ASSET" ]; then
+                echo "ERROR: Could not find CLI macOS assets for $NAME ($LATEST_TAG). Skipping formula."
+                DO_FORMULA=false
+              else
+                LATEST_INTEL_URL=$(asset_url "$INTEL_ASSET")
+                LATEST_ARM_URL=$(asset_url "$ARM_ASSET")
+              fi
+            fi
+
+            if [ "$DO_CASK" = "true" ]; then
+              GUI_INTEL_ASSET=$(select_asset_name "gui_intel_asset" "{{name}}GUI-{{version}}-macOS_Mac_Intel.dmg" "{{name}}GUI-{{version_no_v}}-macOS_Mac_Intel.dmg")
+              GUI_ARM_ASSET=$(select_asset_name "gui_arm_asset" "{{name}}GUI-{{version}}-macOS_Apple_Silicon.dmg" "{{name}}GUI-{{version_no_v}}-macOS_Apple_Silicon.dmg")
+              if [ -z "$GUI_INTEL_ASSET" ] || [ -z "$GUI_ARM_ASSET" ]; then
+                echo "ERROR: Could not find GUI macOS assets for $NAME ($LATEST_TAG). Skipping cask."
+                DO_CASK=false
+              else
+                LATEST_GUI_INTEL_URL=$(asset_url "$GUI_INTEL_ASSET")
+                LATEST_GUI_ARM_URL=$(asset_url "$GUI_ARM_ASSET")
+              fi
+            fi
+
+            if [ "$DO_FORMULA" != "true" ] && [ "$DO_CASK" != "true" ]; then
+              echo "No installable artifacts found for $NAME. Skipping."
               continue
             fi
 
-            # Construct expected latest URLs
-            LATEST_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${TAG_IN_FILENAME}-macOS_Mac_Intel.zip"
-            LATEST_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}-${TAG_IN_FILENAME}-macOS_Apple_Silicon.zip"
-            LATEST_GUI_INTEL_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${TAG_IN_FILENAME}-macOS_Mac_Intel.dmg"
-            LATEST_GUI_ARM_URL="$REPO/releases/download/$LATEST_TAG/${NAME}GUI-${TAG_IN_FILENAME}-macOS_Apple_Silicon.dmg"
-            echo "Constructed Latest URLs:"
-            echo "  Intel CLI: $LATEST_INTEL_URL"
-            echo "  ARM CLI: $LATEST_ARM_URL"
-            echo "  Intel GUI: $LATEST_GUI_INTEL_URL"
-            echo "  ARM GUI: $LATEST_GUI_ARM_URL"
+            echo "Selected latest URLs:"
+            [ -n "$LATEST_INTEL_URL" ] && echo "  Intel CLI: $LATEST_INTEL_URL"
+            [ -n "$LATEST_ARM_URL" ] && echo "  ARM CLI: $LATEST_ARM_URL"
+            [ -n "$LATEST_GUI_INTEL_URL" ] && echo "  Intel GUI: $LATEST_GUI_INTEL_URL"
+            [ -n "$LATEST_GUI_ARM_URL" ] && echo "  ARM GUI: $LATEST_GUI_ARM_URL"
 
             # Get current URLs (if formula/cask doesn't exist yet, set empty)
             FORMULA_PATH="Formula/$NAME.rb"
@@ -88,78 +166,88 @@ jobs:
             CURRENT_INTEL_URL=""
             CURRENT_GUI_URL=""
 
-            echo "Checking current formula at $FORMULA_PATH..."
-            if [ -f "$FORMULA_PATH" ]; then
+            if [ "$DO_FORMULA" = "true" ]; then
+              echo "Checking current formula at $FORMULA_PATH..."
+            fi
+            if [ "$DO_FORMULA" = "true" ] && [ -f "$FORMULA_PATH" ]; then
               CURRENT_INTEL_URL=$(grep -oP 'url "\K[^"]+' "$FORMULA_PATH" | head -n 1 || echo "")
               echo "Found current Intel URL: $CURRENT_INTEL_URL"
-            else
+            elif [ "$DO_FORMULA" = "true" ]; then
               echo "Formula file not found. Assuming new tool."
             fi
 
-            echo "Checking current cask at $CASK_PATH..."
-            if [ -f "$CASK_PATH" ]; then
+            if [ "$DO_CASK" = "true" ]; then
+              echo "Checking current cask at $CASK_PATH..."
+            fi
+            if [ "$DO_CASK" = "true" ] && [ -f "$CASK_PATH" ]; then
               CURRENT_GUI_URL=$(grep -oP 'url "\K[^"]+' "$CASK_PATH" | head -n 1 || echo "")
               echo "Found current GUI URL: $CURRENT_GUI_URL"
-            else
+            elif [ "$DO_CASK" = "true" ]; then
               echo "Cask file not found. Assuming new tool."
             fi
 
             # Compare URLs; skip if both formula and cask are present and up-to-date
-            if [ -f "$FORMULA_PATH" ] && [ -f "$CASK_PATH" ] && [ "$CURRENT_INTEL_URL" = "$LATEST_INTEL_URL" ] && [ "$CURRENT_GUI_URL" = "$LATEST_GUI_INTEL_URL" ]; then
+            FORMULA_UP_TO_DATE=false
+            CASK_UP_TO_DATE=false
+            if [ "$DO_FORMULA" != "true" ] || { [ -f "$FORMULA_PATH" ] && [ "$CURRENT_INTEL_URL" = "$LATEST_INTEL_URL" ]; }; then
+              FORMULA_UP_TO_DATE=true
+            fi
+            if [ "$DO_CASK" != "true" ] || { [ -f "$CASK_PATH" ] && [ "$CURRENT_GUI_URL" = "$LATEST_GUI_INTEL_URL" ]; }; then
+              CASK_UP_TO_DATE=true
+            fi
+
+            if [ "$FORMULA_UP_TO_DATE" = "true" ] && [ "$CASK_UP_TO_DATE" = "true" ]; then
               echo "$NAME formula and cask are already up-to-date ($LATEST_TAG). Skipping."
               continue
             fi
 
             echo "Update required for $NAME. Proceeding..."
 
-            # Download assets - Using -f to fail fast on 404s
-            echo "Downloading Intel CLI..."
-            curl -fL -o intel.zip "$LATEST_INTEL_URL"
-            echo "Downloading ARM CLI..."
-            curl -fL -o arm.zip "$LATEST_ARM_URL"
-            echo "Downloading Intel GUI..."
-            curl -fL -o gui_intel.dmg "$LATEST_GUI_INTEL_URL"
-            echo "Downloading ARM GUI..."
-            curl -fL -o gui_arm.dmg "$LATEST_GUI_ARM_URL"
-            echo "Downloads complete."
-
             # Calculate checksums
             echo "Calculating checksums..."
-            INTEL_SHA=$(shasum -a 256 intel.zip | awk '{print $1}')
-            ARM_SHA=$(shasum -a 256 arm.zip | awk '{print $1}')
-            GUI_INTEL_SHA=$(shasum -a 256 gui_intel.dmg | awk '{print $1}')
-            GUI_ARM_SHA=$(shasum -a 256 gui_arm.dmg | awk '{print $1}')
+            if [ "$DO_FORMULA" = "true" ]; then
+              INTEL_SHA=$(asset_sha "$INTEL_ASSET" "$LATEST_INTEL_URL" intel.zip)
+              ARM_SHA=$(asset_sha "$ARM_ASSET" "$LATEST_ARM_URL" arm.zip)
+            fi
+            if [ "$DO_CASK" = "true" ]; then
+              GUI_INTEL_SHA=$(asset_sha "$GUI_INTEL_ASSET" "$LATEST_GUI_INTEL_URL" gui_intel.dmg)
+              GUI_ARM_SHA=$(asset_sha "$GUI_ARM_ASSET" "$LATEST_GUI_ARM_URL" gui_arm.dmg)
+            fi
             echo "SHA256 Hashes:"
-            echo "  Intel CLI: $INTEL_SHA"
-            echo "  ARM CLI: $ARM_SHA"
-            echo "  Intel GUI: $GUI_INTEL_SHA"
-            echo "  ARM GUI: $GUI_ARM_SHA"
+            [ -n "${INTEL_SHA:-}" ] && echo "  Intel CLI: $INTEL_SHA"
+            [ -n "${ARM_SHA:-}" ] && echo "  ARM CLI: $ARM_SHA"
+            [ -n "${GUI_INTEL_SHA:-}" ] && echo "  Intel GUI: $GUI_INTEL_SHA"
+            [ -n "${GUI_ARM_SHA:-}" ] && echo "  ARM GUI: $GUI_ARM_SHA"
 
             # Update formula from template
-            echo "Generating formula file: $FORMULA_PATH"
-            sed -e "s/{{ClassName}}/$CLASS_NAME/g" \
-                -e "s/{{desc}}/$DESC/g" \
-                -e "s|{{homepage}}|$REPO|g" \
-                -e "s|{{intel_url}}|$LATEST_INTEL_URL|g" \
-                -e "s|{{arm_url}}|$LATEST_ARM_URL|g" \
-                -e "s/{{intel_sha}}/$INTEL_SHA/g" \
-                -e "s/{{arm_sha}}/$ARM_SHA/g" \
-                -e "s/{{binary_name}}/$BINARY/g" \
-                templates/formula_template.rb > "$FORMULA_PATH"
+            if [ "$DO_FORMULA" = "true" ]; then
+              echo "Generating formula file: $FORMULA_PATH"
+              sed -e "s/{{ClassName}}/$CLASS_NAME/g" \
+                  -e "s/{{desc}}/$DESC/g" \
+                  -e "s|{{homepage}}|$REPO|g" \
+                  -e "s|{{intel_url}}|$LATEST_INTEL_URL|g" \
+                  -e "s|{{arm_url}}|$LATEST_ARM_URL|g" \
+                  -e "s/{{intel_sha}}/$INTEL_SHA/g" \
+                  -e "s/{{arm_sha}}/$ARM_SHA/g" \
+                  -e "s/{{binary_name}}/$BINARY/g" \
+                  templates/formula_template.rb > "$FORMULA_PATH"
+            fi
 
             # Update cask from template
-            echo "Generating cask file: $CASK_PATH"
-            sed -e "s/{{cask_name}}/$CASK_NAME/g" \
-                -e "s/{{version}}/$LATEST_TAG/g" \
-                -e "s|{{gui_intel_url}}|$LATEST_GUI_INTEL_URL|g" \
-                -e "s|{{gui_arm_url}}|$LATEST_GUI_ARM_URL|g" \
-                -e "s/{{gui_intel_sha}}/$GUI_INTEL_SHA/g" \
-                -e "s/{{gui_arm_sha}}/$GUI_ARM_SHA/g" \
-                -e "s/{{app_name}}/$APP_NAME/g" \
-                -e "s/{{desc_gui}}/$DESC_GUI/g" \
-                -e "s|{{homepage}}|$REPO|g" \
-                -e "s/{{app_bundle}}/${NAME}GUI/g" \
-                templates/cask_template.rb > "$CASK_PATH"
+            if [ "$DO_CASK" = "true" ]; then
+              echo "Generating cask file: $CASK_PATH"
+              sed -e "s/{{cask_name}}/$CASK_NAME/g" \
+                  -e "s/{{version}}/$LATEST_TAG/g" \
+                  -e "s|{{gui_intel_url}}|$LATEST_GUI_INTEL_URL|g" \
+                  -e "s|{{gui_arm_url}}|$LATEST_GUI_ARM_URL|g" \
+                  -e "s/{{gui_intel_sha}}/$GUI_INTEL_SHA/g" \
+                  -e "s/{{gui_arm_sha}}/$GUI_ARM_SHA/g" \
+                  -e "s/{{app_name}}/$APP_NAME/g" \
+                  -e "s/{{desc_gui}}/$DESC_GUI/g" \
+                  -e "s|{{homepage}}|$REPO|g" \
+                  -e "s/{{app_bundle}}/$APP_BUNDLE/g" \
+                  templates/cask_template.rb > "$CASK_PATH"
+            fi
 
             # Clean up downloaded files
             echo "Cleaning up temporary files..."
@@ -173,7 +261,7 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add Formula/*.rb Casks/*.rb
+          git add Formula/*.rb Casks/*.rb tools.json README.md Install.md Maintenance.md
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "Update Homebrew formulae and casks for latest versions"
             git push

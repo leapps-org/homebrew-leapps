@@ -39,6 +39,17 @@
       "app_name": "VLEAPP GUI",
       "desc": "Digital forensics tool for parsing vehicle infotainment system backup files, images, and artifacts",
       "desc_gui": "Digital forensics tool for analyzing vehicle infotainment system artifacts with graphical interface"
+    },
+    {
+      "name": "lava",
+      "repo": "https://github.com/leapps-org/LAVA-releases",
+      "formula": false,
+      "cask_name": "lava",
+      "app_name": "LAVA",
+      "app_bundle": "LAVA",
+      "gui_intel_asset": "LAVA-{{version_no_v}}-macOS-Mac_Intel.dmg",
+      "gui_arm_asset": "LAVA-{{version_no_v}}-macOS-Apple_Silicon.dmg",
+      "desc_gui": "LEAPP Artifact Viewer App for reviewing and exploring LEAPP output"
     }
   ]
 }

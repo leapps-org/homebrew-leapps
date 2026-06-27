@@ -23,6 +23,11 @@ brew install aleapp
 brew install vleapp
 ```
 
+#### Warrant Returns Parser
+```
+brew install rleapp
+```
+
 ### GUI Applications
 #### iOS Parser GUI
 ```
@@ -35,6 +40,14 @@ brew install --cask aleapp-gui
 #### Vehicle Parser GUI
 ```
 brew install --cask vleapp-gui
+```
+#### Warrant Returns Parser GUI
+```
+brew install --cask rleapp-gui
+```
+#### LEAPP Artifact Viewer App
+```
+brew install --cask lava
 ```
 
 ## Updates
@@ -70,7 +83,7 @@ brew uninstall ileapp
 ### GUI Applications
 Use this to remove the GUI applications
 ```
-brew uninstall --cask ileapp-gui aleapp-gui vleapp-gui
+brew uninstall --cask ileapp-gui aleapp-gui vleapp-gui rleapp-gui lava
 ```
 
 ### Removing Tap
