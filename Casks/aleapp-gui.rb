@@ -1,12 +1,12 @@
 cask "aleapp-gui" do
-  version "v3.6.0"
+  version "v2026.1.0"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/ALEAPP/releases/download/v3.6.0/aleappGUI-v3.6.0-macOS_Mac_Intel.dmg"
-    sha256 "1528192bc7cde0808347e104dd79a2fec680a2ce33032425c5b6558662c21c43"
+    url "https://github.com/abrignoni/ALEAPP/releases/download/v2026.1.0/aleappGUI-v2026.1.0-macOS_Mac_Intel.dmg"
+    sha256 "c2fe6aeab6585887bfc8b5af1b4e804acee22d02ecff2f10bf7899a625024896"
   else
-    url "https://github.com/abrignoni/ALEAPP/releases/download/v3.6.0/aleappGUI-v3.6.0-macOS_Apple_Silicon.dmg"
-    sha256 "a77a54759ca56544129a36c6e1bafaa5dd8b63046257c3a8dd3f62850899df4f"
+    url "https://github.com/abrignoni/ALEAPP/releases/download/v2026.1.0/aleappGUI-v2026.1.0-macOS_Apple_Silicon.dmg"
+    sha256 "44ea38979f3a3c4afc02086ad3dae41ba3f2f7ae1ccd10a4eb939e22b81dd795"
   end
 
   name "aLEAPP GUI"
