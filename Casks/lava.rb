@@ -1,12 +1,12 @@
 cask "lava" do
-  version "v0.14.0"
+  version "v0.15.0"
 
   if Hardware::CPU.intel?
-    url "https://github.com/leapps-org/LAVA-releases/releases/download/v0.14.0/LAVA-0.14.0-macOS-Mac_Intel.dmg"
-    sha256 "cd9126115f1f5ed9f6c19f537f84b12b92aa9ddaae0e56e973b16fe850d45d0b"
+    url "https://github.com/leapps-org/LAVA-releases/releases/download/v0.15.0/LAVA-0.15.0-macOS-Mac_Intel.dmg"
+    sha256 "7d43b0c641a08592da97824bd3a4fc045c69d211fe6957b1ce901054bf82154b"
   else
-    url "https://github.com/leapps-org/LAVA-releases/releases/download/v0.14.0/LAVA-0.14.0-macOS-Apple_Silicon.dmg"
-    sha256 "902aea14c3bc4b64b4dd0741c42adaa26a9d993bbd9dfb87bde92ad888b2f3ea"
+    url "https://github.com/leapps-org/LAVA-releases/releases/download/v0.15.0/LAVA-0.15.0-macOS-Apple_Silicon.dmg"
+    sha256 "56310d197e125b673083066575980816ddcf42eeb9c365eae56e94ba7a045c18"
   end
 
   name "LAVA"
