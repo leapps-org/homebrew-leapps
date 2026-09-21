@@ -1,12 +1,12 @@
 cask "vleapp-gui" do
-  version "v2026.4.0"
+  version "v2026.4.1"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/VLEAPP/releases/download/v2026.4.0/vleappGUI-v2026.4.0-macOS_Mac_Intel.dmg"
-    sha256 "3ca2f523f39063c53ad48b1c243f5e4e9ddc1d2d64909433090e8c0ae62f9601"
+    url "https://github.com/abrignoni/VLEAPP/releases/download/v2026.4.1/vleappGUI-v2026.4.1-macOS_Mac_Intel.dmg"
+    sha256 "1c87af209ec688e3ecebebd553efd398932885dec5f116ea004f9b37f0f05eb0"
   else
-    url "https://github.com/abrignoni/VLEAPP/releases/download/v2026.4.0/vleappGUI-v2026.4.0-macOS_Apple_Silicon.dmg"
-    sha256 "18583b12b65b64d1a60a20897bb26cf6ba23b7c8d16d1dc2c816f57abbf0407d"
+    url "https://github.com/abrignoni/VLEAPP/releases/download/v2026.4.1/vleappGUI-v2026.4.1-macOS_Apple_Silicon.dmg"
+    sha256 "dff02cd11df144ed9370324d7b10362b036a9af4777f1ac4ea91f551bb5c18f6"
   end
 
   name "VLEAPP GUI"

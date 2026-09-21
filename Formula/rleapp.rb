@@ -3,11 +3,11 @@ class Rleapp < Formula
   homepage "https://github.com/abrignoni/RLEAPP"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/RLEAPP/releases/download/v2026.4.0/rleapp-v2026.4.0-macOS_Mac_Intel.zip"
-    sha256 "a678c68e7d368041bd1dc614a6e5d3d19494d4829cf9a481ef66e0dbf08cc44c"
+    url "https://github.com/abrignoni/RLEAPP/releases/download/v2026.4.1/rleapp-v2026.4.1-macOS_Mac_Intel.zip"
+    sha256 "714c06f4e4b46ee51b23ab1116f57404f7ae6282166b081b451a599c171eeed6"
   else
-    url "https://github.com/abrignoni/RLEAPP/releases/download/v2026.4.0/rleapp-v2026.4.0-macOS_Apple_Silicon.zip"
-    sha256 "2793552fe03d67d5b26129211953b3d49997e14750b9334bc1680c954a535030"
+    url "https://github.com/abrignoni/RLEAPP/releases/download/v2026.4.1/rleapp-v2026.4.1-macOS_Apple_Silicon.zip"
+    sha256 "ed6ae56593cc27ff3c283d94e3a754511b8b7795d92089858d4e1166cce40c3a"
   end
 
   def install
