@@ -121,7 +121,7 @@ unified_asset_name() {
 download() {
   local url="$1"
   local path="$2"
-  curl -fsSL --retry 3 -o "$path" "$url"
+  curl -fsSL --retry 3 --retry-all-errors -o "$path" "$url"
 }
 
 file_sha() {

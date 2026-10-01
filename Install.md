@@ -1,6 +1,11 @@
 # Installation Details
 
-First, add this tap to your Homebrew. This tap will remain until you specifically untap it.
+Homebrew 6 refuses to load a tap that is not one of its own until you trust it, and `brew tap` fails with "Refusing to load ... from untrusted tap". Trust this tap first (an older Homebrew that has no `brew trust` can skip this line):
+```
+brew trust leapps-org/leapps
+```
+
+Then add this tap to your Homebrew. This tap will remain until you specifically untap it.
 ```
 brew tap leapps-org/leapps
 ```
