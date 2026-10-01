@@ -12,8 +12,8 @@ brew tap leapps-org/leapps
 
 Then install the tools you need:
 
-### iLEAPP, ALEAPP and RLEAPP
-Each of these is one program. The cask installs the app, and links its command line as `ileapp`, `aleapp` or `rleapp`. Started without arguments it opens the window; given arguments it is the command line.
+### iLEAPP, ALEAPP, RLEAPP, VLEAPP and DLEAPP
+Each of these is one program. The cask installs the app, and links its command line as `ileapp`, `aleapp`, `rleapp`, `vleapp` or `dleapp`. Started without arguments it opens the window; given arguments it is the command line.
 
 #### iOS Parser
 ```
@@ -27,22 +27,27 @@ brew install --cask aleapp-gui
 ```
 brew install --cask rleapp-gui
 ```
+#### Vehicle Parser
+```
+brew install --cask vleapp-gui
+```
+#### Desktop Parser
+```
+brew install --cask dleapp-gui
+```
 
-The `ileapp`, `aleapp` and `rleapp` formulae stay at the last release that had a separate command-line download and are deprecated. If you have one installed, the cask keeps the formula's command line in place. To move to the one inside the app:
+The `ileapp`, `aleapp`, `rleapp` and `vleapp` formulae stay at the last release that had a separate command-line download and are deprecated. If you have one installed, the cask keeps the formula's command line in place. To move to the one inside the app:
 ```
 brew uninstall ileapp
 brew reinstall --cask ileapp-gui
 ```
 
-### VLEAPP
-#### Vehicle Parser (command line)
+### GLEAPP
+#### Image and video triage
 ```
-brew install vleapp
+brew install --cask gleapp
 ```
-#### Vehicle Parser GUI
-```
-brew install --cask vleapp-gui
-```
+The cask installs the app only; it does not link a command line.
 
 ### LAVA
 #### LEAPP Artifact Viewer App
@@ -75,15 +80,15 @@ brew upgrade ileapp-gui aleapp-gui
 ## Uninstall and Remove
 
 ### Command Line Applications
-Use this command to uninstall the application(s) you no longer want installed:
+Use this command to uninstall a deprecated command-line formula you still have installed:
 ```
-brew uninstall vleapp
+brew uninstall ileapp
 ```
 
 ### GUI Applications
-Use this to remove the GUI applications
+Use this to remove the applications
 ```
-brew uninstall --cask ileapp-gui aleapp-gui vleapp-gui rleapp-gui lava
+brew uninstall --cask ileapp-gui aleapp-gui vleapp-gui rleapp-gui dleapp-gui gleapp lava
 ```
 
 ### Removing Tap

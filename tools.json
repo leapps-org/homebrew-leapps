@@ -36,9 +36,26 @@
       "binary": "vleapp",
       "class_name": "Vleapp",
       "cask_name": "vleapp-gui",
-      "app_name": "VLEAPP GUI",
+      "app_name": "VLEAPP",
       "desc": "Digital forensics tool for parsing vehicle infotainment system backup files, images, and artifacts",
-      "desc_gui": "Digital forensics tool for analyzing vehicle infotainment system artifacts with graphical interface"
+      "desc_gui": "Digital forensics tool for analyzing vehicle infotainment system artifacts"
+    },
+    {
+      "name": "dleapp",
+      "repo": "https://github.com/abrignoni/DLEAPP",
+      "formula": false,
+      "binary": "dleapp",
+      "cask_name": "dleapp-gui",
+      "app_name": "DLEAPP",
+      "desc_gui": "Digital forensics tool for analyzing desktop computer artifacts"
+    },
+    {
+      "name": "gleapp",
+      "repo": "https://github.com/abrignoni/GLEAPP",
+      "formula": false,
+      "cask_name": "gleapp",
+      "app_name": "GLEAPP",
+      "desc_gui": "Image and video forensic triage toolkit"
     },
     {
       "name": "lava",
