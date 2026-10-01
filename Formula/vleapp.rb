@@ -10,6 +10,8 @@ class Vleapp < Formula
     sha256 "72602b588fb0ee3c79eb7022ce8751eac02caefce0c5d4c02889683df6b690ac"
   end
 
+  deprecate! date: "2026-10-01", because: "now ships inside the vleapp-gui cask", replacement_cask: "vleapp-gui"
+
   def install
     bin.install "vleapp"
     chmod 0755, bin/"vleapp"
