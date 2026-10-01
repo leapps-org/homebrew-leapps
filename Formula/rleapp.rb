@@ -10,6 +10,8 @@ class Rleapp < Formula
     sha256 "ed6ae56593cc27ff3c283d94e3a754511b8b7795d92089858d4e1166cce40c3a"
   end
 
+  deprecate! date: "2026-09-30", because: "now ships inside the rleapp-gui cask", replacement_cask: "rleapp-gui"
+
   def install
     bin.install "rleapp"
     chmod 0755, bin/"rleapp"

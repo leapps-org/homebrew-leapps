@@ -1,17 +1,18 @@
 cask "aleapp-gui" do
-  version "v2026.4.1"
+  version "v2026.4.2"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/ALEAPP/releases/download/v2026.4.1/aleappGUI-v2026.4.1-macOS_Mac_Intel.dmg"
-    sha256 "6ebc4d76ad102a56a58292a9dde5045629daf5ff76ddab1fa5e0049476396e4a"
+    url "https://github.com/abrignoni/ALEAPP/releases/download/v2026.4.2/ALEAPP-2026.4.2-macos-x64.dmg"
+    sha256 "c4563c2fb57bcf3de666818fbd85c839c3f248921991af88f1288674495dcee2"
   else
-    url "https://github.com/abrignoni/ALEAPP/releases/download/v2026.4.1/aleappGUI-v2026.4.1-macOS_Apple_Silicon.dmg"
-    sha256 "45883e30f35ba70206cc1f06916b03a26e39c1b4e235e698e190cc5bd4a38ef3"
+    url "https://github.com/abrignoni/ALEAPP/releases/download/v2026.4.2/ALEAPP-2026.4.2-macos-arm64.dmg"
+    sha256 "f68752dc05bcf2045646e1353990bdd9b6cd0b4ba48ae4eafd12cbc9bf06f1fb"
   end
 
-  name "aLEAPP GUI"
-  desc "Digital forensics tool for analyzing Android artifacts with graphical interface"
-  homepage "https://github.com/abrignoni/aLEAPP"
+  name "ALEAPP"
+  desc "Digital forensics tool for analyzing Android artifacts"
+  homepage "https://github.com/abrignoni/ALEAPP"
 
-  app "aleappGUI.app"
+  app "ALEAPP.app"
+  binary "#{appdir}/ALEAPP.app/Contents/MacOS/aleapp"
 end

@@ -10,6 +10,8 @@ class Aleapp < Formula
     sha256 "2829b69c0f9035035d95936ee0a5168674fa6f4ffde01706ee3c6c1d2ecaf7f0"
   end
 
+  deprecate! date: "2026-09-29", because: "now ships inside the aleapp-gui cask", replacement_cask: "aleapp-gui"
+
   def install
     bin.install "aleapp"
     chmod 0755, bin/"aleapp"
