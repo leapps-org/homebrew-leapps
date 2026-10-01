@@ -7,44 +7,39 @@ brew tap leapps-org/leapps
 
 Then install the tools you need:
 
-### CLI Tools
+### iLEAPP, ALEAPP and RLEAPP
+Each of these is one program. The cask installs the app, and links its command line as `ileapp`, `aleapp` or `rleapp`. Started without arguments it opens the window; given arguments it is the command line.
+
 #### iOS Parser
-```
-brew install ileapp
-```
-
-#### Android Parser
-```
-brew install aleapp
-```
-
-#### Vehicle Parser
-```
-brew install vleapp
-```
-
-#### Warrant Returns Parser
-```
-brew install rleapp
-```
-
-### GUI Applications
-#### iOS Parser GUI
 ```
 brew install --cask ileapp-gui
 ```
-#### Android Parser GUI
+#### Android Parser
 ```
 brew install --cask aleapp-gui
+```
+#### Warrant Returns Parser
+```
+brew install --cask rleapp-gui
+```
+
+The `ileapp`, `aleapp` and `rleapp` formulae stay at the last release that had a separate command-line download and are deprecated. If you have one installed, the cask keeps the formula's command line in place. To move to the one inside the app:
+```
+brew uninstall ileapp
+brew reinstall --cask ileapp-gui
+```
+
+### VLEAPP
+#### Vehicle Parser (command line)
+```
+brew install vleapp
 ```
 #### Vehicle Parser GUI
 ```
 brew install --cask vleapp-gui
 ```
-#### Warrant Returns Parser GUI
-```
-brew install --cask rleapp-gui
-```
+
+### LAVA
 #### LEAPP Artifact Viewer App
 ```
 brew install --cask lava
@@ -69,7 +64,7 @@ brew upgrade
 
 To update only specific applications, list their names separated by spaces:
 ```
-brew upgrade ileapp aleapp
+brew upgrade ileapp-gui aleapp-gui
 ```
 
 ## Uninstall and Remove
@@ -77,7 +72,7 @@ brew upgrade ileapp aleapp
 ### Command Line Applications
 Use this command to uninstall the application(s) you no longer want installed:
 ```
-brew uninstall ileapp
+brew uninstall vleapp
 ```
 
 ### GUI Applications

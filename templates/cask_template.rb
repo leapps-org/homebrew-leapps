@@ -14,4 +14,5 @@ cask "{{cask_name}}" do
   homepage "{{homepage}}"
 
   app "{{app_bundle}}.app"
+{{binary_stanza}}
 end

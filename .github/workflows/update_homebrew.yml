@@ -10,252 +10,27 @@ permissions:
 
 jobs:
   update-formulae:
-    runs-on: ubuntu-latest
+    # macOS: the updater mounts each disk image to check what is inside it
+    # before it writes a cask.
+    runs-on: macos-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Process Tools
+        id: process
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          set -eo pipefail # Exit immediately if a command exits with a non-zero status.
-
-          # Instead of storing all tools in a variable and then looping,
-          # we directly read from jq output line by line.
-          while IFS= read -r TOOL; do
-            echo "--- Processing Tool ---"
-            # Extract tool details using jq
-            NAME=$(echo "$TOOL" | jq -r '.name')
-            REPO=$(echo "$TOOL" | jq -r '.repo')
-            BINARY=$(echo "$TOOL" | jq -r '.binary // ""')
-            CLASS_NAME=$(echo "$TOOL" | jq -r '.class_name // ""')
-            CASK_NAME=$(echo "$TOOL" | jq -r '.cask_name // ""')
-            APP_NAME=$(echo "$TOOL" | jq -r '.app_name // ""')
-            APP_BUNDLE=$(echo "$TOOL" | jq -r ".app_bundle // \"${NAME}GUI\"")
-            DESC=$(echo "$TOOL" | jq -r '.desc // ""')
-            DESC_GUI=$(echo "$TOOL" | jq -r '.desc_gui // ""')
-            DO_FORMULA=$(echo "$TOOL" | jq -r '.formula // true')
-            DO_CASK=$(echo "$TOOL" | jq -r '.cask // true')
-
-            echo "Name: $NAME"
-            echo "Repo: $REPO"
-            echo "Binary: $BINARY"
-            echo "Class Name: $CLASS_NAME"
-            echo "Cask Name: $CASK_NAME"
-            echo "App Name: $APP_NAME"
-            echo "Formula enabled: $DO_FORMULA"
-            echo "Cask enabled: $DO_CASK"
-
-            # Fetch the latest release tag
-            OWNER_REPO=$(echo "$REPO" | sed -E 's#^https://github.com/##; s#/$##')
-            echo "Fetching latest tag for $REPO..."
-            RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${OWNER_REPO}/releases/latest")
-            LATEST_TAG=$(echo "$RELEASE_JSON" | jq -r '.tag_name')
-            if [ -z "$LATEST_TAG" ] || [ "$LATEST_TAG" = "null" ]; then
-              echo "ERROR: Could not fetch latest tag for $NAME. Skipping."
-              continue # Skip to the next tool
-            fi
-            echo "Latest tag found: $LATEST_TAG"
-
-            LATEST_TAG_NO_V=${LATEST_TAG#v}
-
-            render_asset_name() {
-              local template="$1"
-              echo "$template" | sed \
-                -e "s/{{name}}/$NAME/g" \
-                -e "s/{{version}}/$LATEST_TAG/g" \
-                -e "s/{{version_no_v}}/$LATEST_TAG_NO_V/g"
-            }
-
-            asset_exists() {
-              local asset_name="$1"
-              echo "$RELEASE_JSON" | jq -e --arg asset_name "$asset_name" '.assets[] | select(.name == $asset_name)' >/dev/null
-            }
-
-            select_asset_name() {
-              local field="$1"
-              local default_with_v="$2"
-              local default_without_v="$3"
-              local configured
-              configured=$(echo "$TOOL" | jq -r --arg field "$field" '.[$field] // ""')
-
-              if [ -n "$configured" ]; then
-                render_asset_name "$configured"
-                return
-              fi
-
-              local candidate_with_v candidate_without_v
-              candidate_with_v=$(render_asset_name "$default_with_v")
-              candidate_without_v=$(render_asset_name "$default_without_v")
-
-              if asset_exists "$candidate_with_v"; then
-                echo "$candidate_with_v"
-              elif asset_exists "$candidate_without_v"; then
-                echo "$candidate_without_v"
-              else
-                echo ""
-              fi
-            }
-
-            asset_url() {
-              local asset_name="$1"
-              echo "$RELEASE_JSON" | jq -r --arg asset_name "$asset_name" '.assets[] | select(.name == $asset_name) | .browser_download_url'
-            }
-
-            asset_sha() {
-              local asset_name="$1"
-              local url="$2"
-              local tmp_file="$3"
-              local digest
-              digest=$(echo "$RELEASE_JSON" | jq -r --arg asset_name "$asset_name" '.assets[] | select(.name == $asset_name) | .digest // ""')
-              if [[ "$digest" == sha256:* ]]; then
-                echo "${digest#sha256:}"
-              else
-                curl -fL -o "$tmp_file" "$url"
-                shasum -a 256 "$tmp_file" | awk '{print $1}'
-              fi
-            }
-
-            INTEL_ASSET=""
-            ARM_ASSET=""
-            GUI_INTEL_ASSET=""
-            GUI_ARM_ASSET=""
-            LATEST_INTEL_URL=""
-            LATEST_ARM_URL=""
-            LATEST_GUI_INTEL_URL=""
-            LATEST_GUI_ARM_URL=""
-
-            if [ "$DO_FORMULA" = "true" ]; then
-              INTEL_ASSET=$(select_asset_name "intel_asset" "{{name}}-{{version}}-macOS_Mac_Intel.zip" "{{name}}-{{version_no_v}}-macOS_Mac_Intel.zip")
-              ARM_ASSET=$(select_asset_name "arm_asset" "{{name}}-{{version}}-macOS_Apple_Silicon.zip" "{{name}}-{{version_no_v}}-macOS_Apple_Silicon.zip")
-              if [ -z "$INTEL_ASSET" ] || [ -z "$ARM_ASSET" ]; then
-                echo "ERROR: Could not find CLI macOS assets for $NAME ($LATEST_TAG). Skipping formula."
-                DO_FORMULA=false
-              else
-                LATEST_INTEL_URL=$(asset_url "$INTEL_ASSET")
-                LATEST_ARM_URL=$(asset_url "$ARM_ASSET")
-              fi
-            fi
-
-            if [ "$DO_CASK" = "true" ]; then
-              GUI_INTEL_ASSET=$(select_asset_name "gui_intel_asset" "{{name}}GUI-{{version}}-macOS_Mac_Intel.dmg" "{{name}}GUI-{{version_no_v}}-macOS_Mac_Intel.dmg")
-              GUI_ARM_ASSET=$(select_asset_name "gui_arm_asset" "{{name}}GUI-{{version}}-macOS_Apple_Silicon.dmg" "{{name}}GUI-{{version_no_v}}-macOS_Apple_Silicon.dmg")
-              if [ -z "$GUI_INTEL_ASSET" ] || [ -z "$GUI_ARM_ASSET" ]; then
-                echo "ERROR: Could not find GUI macOS assets for $NAME ($LATEST_TAG). Skipping cask."
-                DO_CASK=false
-              else
-                LATEST_GUI_INTEL_URL=$(asset_url "$GUI_INTEL_ASSET")
-                LATEST_GUI_ARM_URL=$(asset_url "$GUI_ARM_ASSET")
-              fi
-            fi
-
-            if [ "$DO_FORMULA" != "true" ] && [ "$DO_CASK" != "true" ]; then
-              echo "No installable artifacts found for $NAME. Skipping."
-              continue
-            fi
-
-            echo "Selected latest URLs:"
-            [ -n "$LATEST_INTEL_URL" ] && echo "  Intel CLI: $LATEST_INTEL_URL"
-            [ -n "$LATEST_ARM_URL" ] && echo "  ARM CLI: $LATEST_ARM_URL"
-            [ -n "$LATEST_GUI_INTEL_URL" ] && echo "  Intel GUI: $LATEST_GUI_INTEL_URL"
-            [ -n "$LATEST_GUI_ARM_URL" ] && echo "  ARM GUI: $LATEST_GUI_ARM_URL"
-
-            # Get current URLs (if formula/cask doesn't exist yet, set empty)
-            FORMULA_PATH="Formula/$NAME.rb"
-            CASK_PATH="Casks/$CASK_NAME.rb"
-            CURRENT_INTEL_URL=""
-            CURRENT_GUI_URL=""
-
-            if [ "$DO_FORMULA" = "true" ]; then
-              echo "Checking current formula at $FORMULA_PATH..."
-            fi
-            if [ "$DO_FORMULA" = "true" ] && [ -f "$FORMULA_PATH" ]; then
-              CURRENT_INTEL_URL=$(grep -oP 'url "\K[^"]+' "$FORMULA_PATH" | head -n 1 || echo "")
-              echo "Found current Intel URL: $CURRENT_INTEL_URL"
-            elif [ "$DO_FORMULA" = "true" ]; then
-              echo "Formula file not found. Assuming new tool."
-            fi
-
-            if [ "$DO_CASK" = "true" ]; then
-              echo "Checking current cask at $CASK_PATH..."
-            fi
-            if [ "$DO_CASK" = "true" ] && [ -f "$CASK_PATH" ]; then
-              CURRENT_GUI_URL=$(grep -oP 'url "\K[^"]+' "$CASK_PATH" | head -n 1 || echo "")
-              echo "Found current GUI URL: $CURRENT_GUI_URL"
-            elif [ "$DO_CASK" = "true" ]; then
-              echo "Cask file not found. Assuming new tool."
-            fi
-
-            # Compare URLs; skip if both formula and cask are present and up-to-date
-            FORMULA_UP_TO_DATE=false
-            CASK_UP_TO_DATE=false
-            if [ "$DO_FORMULA" != "true" ] || { [ -f "$FORMULA_PATH" ] && [ "$CURRENT_INTEL_URL" = "$LATEST_INTEL_URL" ]; }; then
-              FORMULA_UP_TO_DATE=true
-            fi
-            if [ "$DO_CASK" != "true" ] || { [ -f "$CASK_PATH" ] && [ "$CURRENT_GUI_URL" = "$LATEST_GUI_INTEL_URL" ]; }; then
-              CASK_UP_TO_DATE=true
-            fi
-
-            if [ "$FORMULA_UP_TO_DATE" = "true" ] && [ "$CASK_UP_TO_DATE" = "true" ]; then
-              echo "$NAME formula and cask are already up-to-date ($LATEST_TAG). Skipping."
-              continue
-            fi
-
-            echo "Update required for $NAME. Proceeding..."
-
-            # Calculate checksums
-            echo "Calculating checksums..."
-            if [ "$DO_FORMULA" = "true" ]; then
-              INTEL_SHA=$(asset_sha "$INTEL_ASSET" "$LATEST_INTEL_URL" intel.zip)
-              ARM_SHA=$(asset_sha "$ARM_ASSET" "$LATEST_ARM_URL" arm.zip)
-            fi
-            if [ "$DO_CASK" = "true" ]; then
-              GUI_INTEL_SHA=$(asset_sha "$GUI_INTEL_ASSET" "$LATEST_GUI_INTEL_URL" gui_intel.dmg)
-              GUI_ARM_SHA=$(asset_sha "$GUI_ARM_ASSET" "$LATEST_GUI_ARM_URL" gui_arm.dmg)
-            fi
-            echo "SHA256 Hashes:"
-            [ -n "${INTEL_SHA:-}" ] && echo "  Intel CLI: $INTEL_SHA"
-            [ -n "${ARM_SHA:-}" ] && echo "  ARM CLI: $ARM_SHA"
-            [ -n "${GUI_INTEL_SHA:-}" ] && echo "  Intel GUI: $GUI_INTEL_SHA"
-            [ -n "${GUI_ARM_SHA:-}" ] && echo "  ARM GUI: $GUI_ARM_SHA"
-
-            # Update formula from template
-            if [ "$DO_FORMULA" = "true" ]; then
-              echo "Generating formula file: $FORMULA_PATH"
-              sed -e "s/{{ClassName}}/$CLASS_NAME/g" \
-                  -e "s/{{desc}}/$DESC/g" \
-                  -e "s|{{homepage}}|$REPO|g" \
-                  -e "s|{{intel_url}}|$LATEST_INTEL_URL|g" \
-                  -e "s|{{arm_url}}|$LATEST_ARM_URL|g" \
-                  -e "s/{{intel_sha}}/$INTEL_SHA/g" \
-                  -e "s/{{arm_sha}}/$ARM_SHA/g" \
-                  -e "s/{{binary_name}}/$BINARY/g" \
-                  templates/formula_template.rb > "$FORMULA_PATH"
-            fi
-
-            # Update cask from template
-            if [ "$DO_CASK" = "true" ]; then
-              echo "Generating cask file: $CASK_PATH"
-              sed -e "s/{{cask_name}}/$CASK_NAME/g" \
-                  -e "s/{{version}}/$LATEST_TAG/g" \
-                  -e "s|{{gui_intel_url}}|$LATEST_GUI_INTEL_URL|g" \
-                  -e "s|{{gui_arm_url}}|$LATEST_GUI_ARM_URL|g" \
-                  -e "s/{{gui_intel_sha}}/$GUI_INTEL_SHA/g" \
-                  -e "s/{{gui_arm_sha}}/$GUI_ARM_SHA/g" \
-                  -e "s/{{app_name}}/$APP_NAME/g" \
-                  -e "s/{{desc_gui}}/$DESC_GUI/g" \
-                  -e "s|{{homepage}}|$REPO|g" \
-                  -e "s/{{app_bundle}}/$APP_BUNDLE/g" \
-                  templates/cask_template.rb > "$CASK_PATH"
-            fi
-
-            # Clean up downloaded files
-            echo "Cleaning up temporary files..."
-            rm -f intel.zip arm.zip gui_intel.dmg gui_arm.dmg
-
-            echo "Finished processing $NAME."
-          done < <(jq -c '.tools[]' tools.json)
-          echo "--- All tools processed ---"
+          status=0
+          bash scripts/update_homebrew.sh || status=$?
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          # 3 means every tool was processed and at least one could not be
+          # updated: what did update is committed, and the last step fails the run.
+          if [ "$status" -ne 0 ] && [ "$status" -ne 3 ]; then
+            exit "$status"
+          fi
 
       - name: Commit and Push Changes
         run: |
@@ -268,3 +43,9 @@ jobs:
           else
             echo "No changes to commit."
           fi
+
+      - name: Fail when a tool could not be updated
+        if: steps.process.outputs.status == '3'
+        run: |
+          echo "At least one tool could not be updated. See the ERROR lines of the Process Tools step."
+          exit 1
