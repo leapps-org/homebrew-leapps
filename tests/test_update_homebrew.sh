@@ -350,6 +350,32 @@ expect_file "names set in tools.json: the cask" "$TAP/Casks/viewer.rb" "cask \"v
   app \"Viewer.app\"
 end"
 
+echo "1b. New names for a tool with no command line to link"
+TAP1B="$T/tap1b"
+new_tap "$TAP1B"
+echo '{"tools": [{"name": "newtool", "repo": "https://github.com/example/NewTool", "formula": false, "cask_name": "newtool", "app_name": "NewTool", "desc_gui": "New tool"}]}' >"$TAP1B/tools.json"
+newtool_release "$NEW_DMG_INTEL" "$NEW_DMG_ARM" >"$TAP1B/releases/newtool.json"
+STATUS=$(run_updater "$TAP1B" "$T/run1b.log")
+expect_status "the run succeeds" 0 "$STATUS"
+expect_file "the cask names the app and has no binary stanza" "$TAP1B/Casks/newtool.rb" "cask \"newtool\" do
+  version \"v2.0.0\"
+
+  if Hardware::CPU.intel?
+    url \"file://$ASSETS/NewTool-2.0.0-macos-x64.dmg\"
+    sha256 \"$NEW_DMG_INTEL\"
+  else
+    url \"file://$ASSETS/NewTool-2.0.0-macos-arm64.dmg\"
+    sha256 \"$NEW_DMG_ARM\"
+  end
+
+  name \"NewTool\"
+  desc \"New tool\"
+  homepage \"https://github.com/example/NewTool\"
+
+  app \"NewTool.app\"
+end"
+expect_absent "no formula is written" "$TAP1B/Formula/newtool.rb"
+
 echo "2. A second run changes nothing"
 BEFORE=$(cd "$TAP" && cat Formula/*.rb Casks/*.rb | shasum -a 256)
 STATUS=$(run_updater "$TAP" "$T/run2.log")

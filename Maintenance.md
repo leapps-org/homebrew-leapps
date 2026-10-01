@@ -31,6 +31,8 @@ The steps live in `scripts/update_homebrew.sh`, which the workflow runs on a mac
 |   `-- vleapp.rb
 |-- Casks/
 |   |-- aleapp-gui.rb
+|   |-- dleapp-gui.rb
+|   |-- gleapp.rb
 |   |-- ileapp-gui.rb
 |   |-- lava.rb
 |   |-- rleapp-gui.rb
@@ -67,12 +69,12 @@ The steps live in `scripts/update_homebrew.sh`, which the workflow runs on a mac
 For each tool the updater tries, in this order:
 
 1. The names set in `tools.json` (`intel_asset`, `arm_asset`, `gui_intel_asset`, `gui_arm_asset`).
-2. The per-program names, with and without the `v`: `{{name}}-{{version}}-macOS_Mac_Intel.zip` and `{{name}}-{{version}}-macOS_Apple_Silicon.zip` for the formula, `{{name}}GUI-{{version}}-macOS_Mac_Intel.dmg` and `{{name}}GUI-{{version}}-macOS_Apple_Silicon.dmg` for the cask. VLEAPP publishes these.
-3. The names of a release with one program per tool: `<Tool>-<version>-macos-x64.dmg` and `<Tool>-<version>-macos-arm64.dmg`, with no `v` in the version and the tool spelled the project's way (`iLEAPP-2026.4.3-macos-arm64.dmg`). iLEAPP, ALEAPP and RLEAPP publish these.
+2. The per-program names, with and without the `v`: `{{name}}-{{version}}-macOS_Mac_Intel.zip` and `{{name}}-{{version}}-macOS_Apple_Silicon.zip` for the formula, `{{name}}GUI-{{version}}-macOS_Mac_Intel.dmg` and `{{name}}GUI-{{version}}-macOS_Apple_Silicon.dmg` for the cask. No tool publishes these since VLEAPP 2026.4.2; they are kept for a release made the old way.
+3. The names of a release with one program per tool: `<Tool>-<version>-macos-x64.dmg` and `<Tool>-<version>-macos-arm64.dmg`, with no `v` in the version and the tool spelled the project's way (`iLEAPP-2026.4.3-macos-arm64.dmg`). iLEAPP, ALEAPP, RLEAPP, VLEAPP, DLEAPP and GLEAPP publish these.
 
 A release with one program per tool has no command-line download. Its disk image holds `<Tool>.app`, and the command line is inside it at `<Tool>.app/Contents/MacOS/<binary>`. For such a release the updater:
 
-- writes the cask with `app "<Tool>.app"` and a `binary` stanza that links the command line, so `brew install --cask ileapp-gui` also puts `ileapp` on the PATH;
+- writes the cask with `app "<Tool>.app"` and a `binary` stanza that links the command line, so `brew install --cask ileapp-gui` also puts `ileapp` on the PATH. A tool with no `binary` in `tools.json` (GLEAPP) gets no `binary` stanza;
 - leaves the formula at the last version that had a command-line download and marks it deprecated with the cask as its replacement.
 
 A tool that moves from the per-program names to the new ones needs no change here: the updater follows the release.
