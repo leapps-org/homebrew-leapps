@@ -6,19 +6,19 @@
       "binary": "ileapp",
       "class_name": "Ileapp",
       "cask_name": "ileapp-gui",
-      "app_name": "iLEAPP GUI",
+      "app_name": "iLEAPP",
       "desc": "Digital forensics tool for parsing iOS backup files, images, and artifacts",
-      "desc_gui": "Digital forensics tool for analyzing iOS artifacts with graphical interface"
+      "desc_gui": "Digital forensics tool for analyzing iOS artifacts"
     },
     {
       "name": "aleapp",
-      "repo": "https://github.com/abrignoni/aLEAPP",
+      "repo": "https://github.com/abrignoni/ALEAPP",
       "binary": "aleapp",
       "class_name": "Aleapp",
       "cask_name": "aleapp-gui",
-      "app_name": "aLEAPP GUI",
+      "app_name": "ALEAPP",
       "desc": "Digital forensics tool for parsing Android backup files, images, and artifacts",
-      "desc_gui": "Digital forensics tool for analyzing Android artifacts with graphical interface"
+      "desc_gui": "Digital forensics tool for analyzing Android artifacts"
     },
     {
       "name": "rleapp",
@@ -26,9 +26,9 @@
       "binary": "rleapp",
       "class_name": "Rleapp",
       "cask_name": "rleapp-gui",
-      "app_name": "RLEAPP GUI",
+      "app_name": "RLEAPP",
       "desc": "Digital forensics tool for parsing service provider warrant or data return files",
-      "desc_gui": "Digital forensics tool for parsing service provider warrant or data return files with graphical interface"
+      "desc_gui": "Digital forensics tool for parsing service provider warrant or data return files"
     },
     {
       "name": "vleapp",

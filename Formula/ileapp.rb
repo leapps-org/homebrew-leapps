@@ -10,6 +10,8 @@ class Ileapp < Formula
     sha256 "d99f2d05dbde20ee997de477c38443d4f019d60326a8c6b9456058c6cf590386"
   end
 
+  deprecate! date: "2026-09-29", because: "now ships inside the ileapp-gui cask", replacement_cask: "ileapp-gui"
+
   def install
     bin.install "ileapp"
     chmod 0755, bin/"ileapp"
