@@ -1,12 +1,12 @@
 cask "rleapp-gui" do
-  version "v2026.4.3"
+  version "v2026.4.4"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/RLEAPP/releases/download/v2026.4.3/RLEAPP-2026.4.3-macos-x64.dmg"
-    sha256 "ffd6a5ca0e700a25839f88ca0f4445d3c92db9c3c6945c51ff4f4d2eb3497442"
+    url "https://github.com/abrignoni/RLEAPP/releases/download/v2026.4.4/RLEAPP-2026.4.4-macos-x64.dmg"
+    sha256 "e68eaa1b492e884ae56e9e1105c6ed9c3b15322dc4b2b97b4860f9f375d82977"
   else
-    url "https://github.com/abrignoni/RLEAPP/releases/download/v2026.4.3/RLEAPP-2026.4.3-macos-arm64.dmg"
-    sha256 "3358dc51466962098dd2cd5620443a4051af8a9eb2f6e9d3ff5cd93df4695050"
+    url "https://github.com/abrignoni/RLEAPP/releases/download/v2026.4.4/RLEAPP-2026.4.4-macos-arm64.dmg"
+    sha256 "c490d839732c2f91bb7a70c3948819e82bb5921e104d4fe3fd772f1bca667838"
   end
 
   name "RLEAPP"

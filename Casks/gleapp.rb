@@ -1,12 +1,12 @@
 cask "gleapp" do
-  version "v2026.5.4"
+  version "v2026.5.5"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/GLEAPP/releases/download/v2026.5.4/GLEAPP-2026.5.4-macos-x64.dmg"
-    sha256 "e08fc4abd9d70f31d9a873a5d335c989dec383510481d1309a0cc6fc0d0b472e"
+    url "https://github.com/abrignoni/GLEAPP/releases/download/v2026.5.5/GLEAPP-2026.5.5-macos-x64.dmg"
+    sha256 "76f6ef5f0a78f248949167466133f8c1754a9765a3f6e38f96c22fc86bc51981"
   else
-    url "https://github.com/abrignoni/GLEAPP/releases/download/v2026.5.4/GLEAPP-2026.5.4-macos-arm64.dmg"
-    sha256 "110d5ef2bcadccb94c0c7262e1eda801c844c1e74e721cd6d6e06609d068e8ea"
+    url "https://github.com/abrignoni/GLEAPP/releases/download/v2026.5.5/GLEAPP-2026.5.5-macos-arm64.dmg"
+    sha256 "19808e38235e7a0281e88eb7284898cc526fca330c9beebb26e296771f1bd960"
   end
 
   name "GLEAPP"
