@@ -1,12 +1,12 @@
 cask "dleapp-gui" do
-  version "v2026.4.4"
+  version "v2026.4.5"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/DLEAPP/releases/download/v2026.4.4/DLEAPP-2026.4.4-macos-x64.dmg"
-    sha256 "e6239788b355cc55f77ed20df4f25af722968d2dd6aa71756ad4f28203e115e2"
+    url "https://github.com/abrignoni/DLEAPP/releases/download/v2026.4.5/DLEAPP-2026.4.5-macos-x64.dmg"
+    sha256 "1701d15a76f982717611b77a31470022e99f1104bf31bf7b10eaa64281a94210"
   else
-    url "https://github.com/abrignoni/DLEAPP/releases/download/v2026.4.4/DLEAPP-2026.4.4-macos-arm64.dmg"
-    sha256 "98efe3fc60396353389ffb6a11538161a9d07e22e97026afc43428617d89e1db"
+    url "https://github.com/abrignoni/DLEAPP/releases/download/v2026.4.5/DLEAPP-2026.4.5-macos-arm64.dmg"
+    sha256 "e1f2ccbb09f4c555e10ad05b44152046693266347ee7c8021d0cc1f6bb7a0571"
   end
 
   name "DLEAPP"
