@@ -1,4 +1,4 @@
-cask "rleapp-gui" do
+cask "rleapp" do
   version "v2026.4.5"
 
   if Hardware::CPU.intel?

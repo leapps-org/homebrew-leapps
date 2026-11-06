@@ -1,4 +1,4 @@
-cask "vleapp-gui" do
+cask "vleapp" do
   version "v2026.4.5"
 
   if Hardware::CPU.intel?
@@ -10,7 +10,7 @@ cask "vleapp-gui" do
   end
 
   name "VLEAPP"
-  desc "Digital forensics tool for analyzing vehicle infotainment system artifacts"
+  desc "Digital forensics tool for parsing vehicle infotainment system backup files, images, and artifacts"
   homepage "https://github.com/abrignoni/VLEAPP"
 
   app "VLEAPP.app"

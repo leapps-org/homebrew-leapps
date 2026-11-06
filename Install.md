@@ -1,100 +1,91 @@
-# Installation Details
+# Installation
 
-Homebrew 6 refuses to load a tap that is not one of its own until you trust it, and `brew tap` fails with "Refusing to load ... from untrusted tap". Trust this tap first (an older Homebrew that has no `brew trust` can skip this line):
-```
+Add the tap, then install whichever tools you need:
+
+Homebrew 6 requires trusting this tap first. Older versions without `brew trust`
+can skip this command:
+
+```sh
 brew trust leapps-org/leapps
 ```
 
-Then add this tap to your Homebrew. This tap will remain until you specifically untap it.
-```
+```sh
 brew tap leapps-org/leapps
+brew install --cask leapps-org/leapps/ileapp
+brew install --cask leapps-org/leapps/aleapp
+brew install --cask leapps-org/leapps/rleapp
+brew install --cask leapps-org/leapps/vleapp
+brew install --cask leapps-org/leapps/dleapp
+brew install --cask leapps-org/leapps/gleapp
+brew install --cask leapps-org/leapps/lava
 ```
 
-Then install the tools you need:
+Each parser cask installs the combined GUI/CLI app and links its command into
+Homebrew's `bin` directory. No shell alias or separate formula is needed:
 
-### iLEAPP, ALEAPP, RLEAPP, VLEAPP and DLEAPP
-Each of these is one program. The cask installs the app, and links its command line as `ileapp`, `aleapp`, `rleapp`, `vleapp` or `dleapp`. Started without arguments it opens the window; given arguments it is the command line.
-
-#### iOS Parser
-```
-brew install --cask ileapp-gui
-```
-#### Android Parser
-```
-brew install --cask aleapp-gui
-```
-#### Warrant Returns Parser
-```
-brew install --cask rleapp-gui
-```
-#### Vehicle Parser
-```
-brew install --cask vleapp-gui
-```
-#### Desktop Parser
-```
-brew install --cask dleapp-gui
+```sh
+ileapp --help
+aleapp --help
+rleapp --help
+vleapp --help
+dleapp --help
+gleapp --help
 ```
 
-The `ileapp`, `aleapp`, `rleapp` and `vleapp` formulae stay at the last release that had a separate command-line download and are deprecated. If you have one installed, the cask keeps the formula's command line in place. To move to the one inside the app:
-```
-brew uninstall ileapp
-brew reinstall --cask ileapp-gui
+Running a parser without arguments opens its GUI. You can also launch the app
+from Applications. The executable stays inside its app bundle alongside its
+dependencies. Custom Homebrew `--appdir` locations are supported.
+
+## Upgrading older installations
+
+```sh
+brew update
+brew upgrade --cask
 ```
 
-### GLEAPP
-#### Image and video triage
-```
-brew install --cask gleapp
-```
-The cask installs the app only; it does not link a command line.
+The tap includes formula-to-cask migration records for the original four parsers and
+rename records from `ileapp-gui`, `aleapp-gui`, `rleapp-gui`, `vleapp-gui`, and `dleapp-gui`
+to their plain names. Current Homebrew can migrate these during an update.
+Follow any migration or trust instructions Homebrew prints.
 
-### LAVA
-#### LEAPP Artifact Viewer App
+For a former formula installation, Homebrew may unlink the old formula and
+install the cask, leaving the old formula keg for you to remove. If automatic
+migration does not complete, use the following for each affected tool
+(iLEAPP shown):
+
+```sh
+brew uninstall --formula --force ileapp
+brew install --cask leapps-org/leapps/ileapp
 ```
-brew install --cask lava
+
+If you had the old GUI cask, its renamed installation can be migrated explicitly:
+
+```sh
+brew migrate --cask ileapp
+brew upgrade --cask ileapp
 ```
+
+If both the old CLI formula and GUI cask were installed, remove the old formula
+before upgrading the cask so its command link is free.
 
 ## Updates
 
-First, update homebrew itself:
-```
+```sh
 brew update
+brew outdated --cask
+brew upgrade --cask ileapp aleapp rleapp vleapp dleapp gleapp lava
 ```
 
-This will list all of the applications that have newer versions:
-```
-brew outdated
+## Uninstall
+
+Uninstalling a cask removes both its app and its Homebrew-managed CLI link:
+
+```sh
+brew uninstall --cask ileapp aleapp rleapp vleapp dleapp gleapp lava
 ```
 
-To update all of your homebrew installed applications (not just LEAPPs):
-```
-brew upgrade
-```
+To remove the tap after uninstalling the tools:
 
-To update only specific applications, list their names separated by spaces:
-```
-brew upgrade ileapp-gui aleapp-gui
-```
-
-## Uninstall and Remove
-
-### Command Line Applications
-Use this command to uninstall a deprecated command-line formula you still have installed:
-```
-brew uninstall ileapp
-```
-
-### GUI Applications
-Use this to remove the applications
-```
-brew uninstall --cask ileapp-gui aleapp-gui vleapp-gui rleapp-gui dleapp-gui gleapp lava
-```
-
-### Removing Tap
-This will not remove any of the tools installed through this tap. See instructions above to remove those.
-
-Remove the tap from homebrew with this:
-```
+```sh
 brew untap leapps-org/leapps
 ```

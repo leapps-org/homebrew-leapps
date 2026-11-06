@@ -247,7 +247,7 @@ retire_formula() {
 }
 
 process_tool() {
-  local NAME REPO BINARY CLASS_NAME CASK_NAME APP_NAME APP_BUNDLE DESC DESC_GUI DO_FORMULA DO_CASK
+  local NAME REPO BINARY BINARY_EXECUTABLE CLASS_NAME CASK_NAME APP_NAME APP_BUNDLE DESC DESC_GUI DO_FORMULA DO_CASK
   local OWNER_REPO RELEASE_JSON LATEST_TAG LATEST_TAG_NO_V SUMS_FILE SUMS_URL
   local INTEL_ASSET="" ARM_ASSET="" GUI_INTEL_ASSET="" GUI_ARM_ASSET=""
   local LATEST_INTEL_URL="" LATEST_ARM_URL="" LATEST_GUI_INTEL_URL="" LATEST_GUI_ARM_URL=""
@@ -261,6 +261,7 @@ process_tool() {
   NAME=$(tool_field name)
   REPO=$(tool_field repo)
   BINARY=$(tool_field binary)
+  BINARY_EXECUTABLE=$(tool_field binary_executable "$BINARY")
   CLASS_NAME=$(tool_field class_name)
   CASK_NAME=$(tool_field cask_name)
   APP_NAME=$(tool_field app_name)
@@ -340,6 +341,11 @@ process_tool() {
       DO_CASK=false
     fi
     if [ "$DO_CASK" = "true" ]; then
+      # Explicit asset templates can select unified downloads too. The command
+      # may differ in case from the executable in the app (GLEAPP -> gleapp).
+      if [ "$UNIFIED" = "true" ]; then
+        LINK_BINARY="$BINARY_EXECUTABLE"
+      fi
       LATEST_GUI_INTEL_URL=$(asset_url "$GUI_INTEL_ASSET")
       LATEST_GUI_ARM_URL=$(asset_url "$GUI_ARM_ASSET")
     fi
@@ -479,6 +485,9 @@ process_tool() {
     echo "Generating cask file: $CASK_PATH"
     if [ -n "$LINK_BINARY" ]; then
       binary_expression="s|{{binary_stanza}}|  binary \"#{appdir}/$APP_BUNDLE.app/Contents/MacOS/$LINK_BINARY\"|"
+      if [ "$LINK_BINARY" != "$BINARY" ]; then
+        binary_expression="s|{{binary_stanza}}|  binary \"#{appdir}/$APP_BUNDLE.app/Contents/MacOS/$LINK_BINARY\", target: \"$BINARY\"|"
+      fi
     else
       binary_expression="/{{binary_stanza}}/d"
     fi

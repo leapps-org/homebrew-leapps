@@ -1,66 +1,82 @@
 {
   "tools": [
     {
+      "formula": false,
       "name": "ileapp",
       "repo": "https://github.com/abrignoni/iLEAPP",
       "binary": "ileapp",
-      "class_name": "Ileapp",
-      "cask_name": "ileapp-gui",
+      "cask_name": "ileapp",
       "app_name": "iLEAPP",
-      "desc": "Digital forensics tool for parsing iOS backup files, images, and artifacts",
-      "desc_gui": "Digital forensics tool for analyzing iOS artifacts"
+      "desc_gui": "Digital forensics tool for parsing iOS backup files, images, and artifacts",
+      "app_bundle": "iLEAPP",
+      "gui_intel_asset": "iLEAPP-{{version_no_v}}-macos-x64.dmg",
+      "gui_arm_asset": "iLEAPP-{{version_no_v}}-macos-arm64.dmg"
     },
     {
+      "formula": false,
       "name": "aleapp",
       "repo": "https://github.com/abrignoni/ALEAPP",
       "binary": "aleapp",
-      "class_name": "Aleapp",
-      "cask_name": "aleapp-gui",
+      "cask_name": "aleapp",
       "app_name": "ALEAPP",
-      "desc": "Digital forensics tool for parsing Android backup files, images, and artifacts",
-      "desc_gui": "Digital forensics tool for analyzing Android artifacts"
+      "desc_gui": "Digital forensics tool for parsing Android backup files, images, and artifacts",
+      "app_bundle": "ALEAPP",
+      "gui_intel_asset": "ALEAPP-{{version_no_v}}-macos-x64.dmg",
+      "gui_arm_asset": "ALEAPP-{{version_no_v}}-macos-arm64.dmg"
     },
     {
+      "formula": false,
       "name": "rleapp",
       "repo": "https://github.com/abrignoni/RLEAPP",
       "binary": "rleapp",
-      "class_name": "Rleapp",
-      "cask_name": "rleapp-gui",
+      "cask_name": "rleapp",
       "app_name": "RLEAPP",
-      "desc": "Digital forensics tool for parsing service provider warrant or data return files",
-      "desc_gui": "Digital forensics tool for parsing service provider warrant or data return files"
+      "desc_gui": "Digital forensics tool for parsing service provider warrant or data return files",
+      "app_bundle": "RLEAPP",
+      "gui_intel_asset": "RLEAPP-{{version_no_v}}-macos-x64.dmg",
+      "gui_arm_asset": "RLEAPP-{{version_no_v}}-macos-arm64.dmg"
     },
     {
+      "formula": false,
       "name": "vleapp",
       "repo": "https://github.com/abrignoni/VLEAPP",
       "binary": "vleapp",
-      "class_name": "Vleapp",
-      "cask_name": "vleapp-gui",
+      "cask_name": "vleapp",
       "app_name": "VLEAPP",
-      "desc": "Digital forensics tool for parsing vehicle infotainment system backup files, images, and artifacts",
-      "desc_gui": "Digital forensics tool for analyzing vehicle infotainment system artifacts"
+      "desc_gui": "Digital forensics tool for parsing vehicle infotainment system backup files, images, and artifacts",
+      "app_bundle": "VLEAPP",
+      "gui_intel_asset": "VLEAPP-{{version_no_v}}-macos-x64.dmg",
+      "gui_arm_asset": "VLEAPP-{{version_no_v}}-macos-arm64.dmg"
     },
     {
+      "formula": false,
       "name": "dleapp",
       "repo": "https://github.com/abrignoni/DLEAPP",
-      "formula": false,
       "binary": "dleapp",
-      "cask_name": "dleapp-gui",
+      "cask_name": "dleapp",
       "app_name": "DLEAPP",
-      "desc_gui": "Digital forensics tool for analyzing desktop computer artifacts"
+      "desc_gui": "Digital forensics tool for parsing desktop operating system artifacts",
+      "app_bundle": "DLEAPP",
+      "gui_intel_asset": "DLEAPP-{{version_no_v}}-macos-x64.dmg",
+      "gui_arm_asset": "DLEAPP-{{version_no_v}}-macos-arm64.dmg"
     },
     {
+      "formula": false,
       "name": "gleapp",
       "repo": "https://github.com/abrignoni/GLEAPP",
-      "formula": false,
+      "binary": "gleapp",
+      "binary_executable": "GLEAPP",
       "cask_name": "gleapp",
       "app_name": "GLEAPP",
-      "desc_gui": "Image and video forensic triage toolkit"
+      "desc_gui": "Image and video forensic triage toolkit",
+      "app_bundle": "GLEAPP",
+      "gui_intel_asset": "GLEAPP-{{version_no_v}}-macos-x64.dmg",
+      "gui_arm_asset": "GLEAPP-{{version_no_v}}-macos-arm64.dmg"
     },
     {
+      "formula": false,
       "name": "lava",
       "repo": "https://github.com/leapps-org/LAVA-releases",
-      "formula": false,
       "cask_name": "lava",
       "app_name": "LAVA",
       "app_bundle": "LAVA",

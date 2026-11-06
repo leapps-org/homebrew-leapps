@@ -1,4 +1,4 @@
-cask "dleapp-gui" do
+cask "dleapp" do
   version "v2026.4.5"
 
   if Hardware::CPU.intel?
@@ -10,7 +10,7 @@ cask "dleapp-gui" do
   end
 
   name "DLEAPP"
-  desc "Digital forensics tool for analyzing desktop computer artifacts"
+  desc "Digital forensics tool for parsing desktop operating system artifacts"
   homepage "https://github.com/abrignoni/DLEAPP"
 
   app "DLEAPP.app"

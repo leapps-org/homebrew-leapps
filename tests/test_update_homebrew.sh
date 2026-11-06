@@ -376,6 +376,23 @@ expect_file "the cask names the app and has no binary stanza" "$TAP1B/Casks/newt
 end"
 expect_absent "no formula is written" "$TAP1B/Formula/newtool.rb"
 
+echo "1c. Configured unified assets link a differently named executable"
+TAP1C="$T/tap1c"
+new_tap "$TAP1C"
+jq -n --argjson tool "$NEWTOOL_JSON" '{tools: [$tool + {
+  formula: false, cask_name: "newtool", app_bundle: "NewTool",
+  binary: "newtool-cli", binary_executable: "newtool",
+  gui_intel_asset: "NewTool-{{version_no_v}}-macos-x64.dmg",
+  gui_arm_asset: "NewTool-{{version_no_v}}-macos-arm64.dmg"
+}]}' >"$TAP1C/tools.json"
+newtool_release "$NEW_DMG_INTEL" "$NEW_DMG_ARM" >"$TAP1C/releases/newtool.json"
+STATUS=$(run_updater "$TAP1C" "$T/run1c.log")
+expect_status "configured combined cask succeeds" 0 "$STATUS"
+expect_output "the CLI is checked inside the mounted bundle" "$T/run1c.log" "with Contents/MacOS/newtool"
+expect_output "the cask links the executable under the command name" "$TAP1C/Casks/newtool.rb" \
+  'binary "#{appdir}/NewTool.app/Contents/MacOS/newtool", target: "newtool-cli"'
+expect_absent "no formula is written" "$TAP1C/Formula/newtool.rb"
+
 echo "2. A second run changes nothing"
 BEFORE=$(cd "$TAP" && cat Formula/*.rb Casks/*.rb | shasum -a 256)
 STATUS=$(run_updater "$TAP" "$T/run2.log")

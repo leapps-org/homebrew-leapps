@@ -1,4 +1,4 @@
-cask "aleapp-gui" do
+cask "aleapp" do
   version "v2026.4.5"
 
   if Hardware::CPU.intel?
@@ -10,8 +10,8 @@ cask "aleapp-gui" do
   end
 
   name "ALEAPP"
-  desc "Digital forensics tool for analyzing Android artifacts"
-  homepage "https://github.com/abrignoni/ALEAPP"
+  desc "Digital forensics tool for parsing Android backup files, images, and artifacts"
+  homepage "https://github.com/abrignoni/aLEAPP"
 
   app "ALEAPP.app"
   binary "#{appdir}/ALEAPP.app/Contents/MacOS/aleapp"

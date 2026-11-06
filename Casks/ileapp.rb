@@ -1,4 +1,4 @@
-cask "ileapp-gui" do
+cask "ileapp" do
   version "v2026.4.6"
 
   if Hardware::CPU.intel?
@@ -10,7 +10,7 @@ cask "ileapp-gui" do
   end
 
   name "iLEAPP"
-  desc "Digital forensics tool for analyzing iOS artifacts"
+  desc "Digital forensics tool for parsing iOS backup files, images, and artifacts"
   homepage "https://github.com/abrignoni/iLEAPP"
 
   app "iLEAPP.app"

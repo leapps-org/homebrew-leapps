@@ -14,4 +14,5 @@ cask "gleapp" do
   homepage "https://github.com/abrignoni/GLEAPP"
 
   app "GLEAPP.app"
+  binary "#{appdir}/GLEAPP.app/Contents/MacOS/GLEAPP", target: "gleapp"
 end

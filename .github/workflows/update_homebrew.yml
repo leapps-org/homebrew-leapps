@@ -1,4 +1,4 @@
-name: Update Homebrew Formulae and Casks
+name: Update Homebrew Casks
 
 on:
   schedule:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  update-formulae:
+  update-casks:
     # macOS: the updater mounts each disk image to check what is inside it
     # before it writes a cask.
     runs-on: macos-latest
@@ -36,9 +36,9 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add Formula/*.rb Casks/*.rb tools.json README.md Install.md Maintenance.md
-          if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "Update Homebrew formulae and casks for latest versions"
+          git add Casks/*.rb
+          if ! git diff --cached --quiet; then
+            git commit -m "Update Homebrew casks for latest versions"
             git push
           else
             echo "No changes to commit."
