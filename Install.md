@@ -2,7 +2,7 @@
 
 Add the tap, then install whichever tools you need:
 
-Homebrew 6 requires trusting this tap first. Older versions without `brew trust`
+Current Homebrew may require trusting this tap first. Older versions without `brew trust`
 can skip this command:
 
 ```sh

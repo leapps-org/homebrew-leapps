@@ -25,7 +25,7 @@ brew install --cask leapps-org/leapps/ileapp
 ileapp --help
 ```
 
-On Homebrew 6, run `brew trust leapps-org/leapps` before tapping.
+Current Homebrew may require `brew trust leapps-org/leapps` before tapping.
 
 Use `aleapp`, `rleapp`, `vleapp`, `dleapp`, or `gleapp` for the other tools. Running a parser
 without arguments opens its GUI. The former CLI formulas and `*-gui` casks
