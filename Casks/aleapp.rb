@@ -1,17 +1,17 @@
 cask "aleapp" do
-  version "v2026.4.5"
+  version "v2026.4.6"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/ALEAPP/releases/download/v2026.4.5/ALEAPP-2026.4.5-macos-x64.dmg"
-    sha256 "508a478e67b759ff5b37790d80a0bc236f0487509c8fcf33d80dd554adb2733e"
+    url "https://github.com/abrignoni/ALEAPP/releases/download/v2026.4.6/ALEAPP-2026.4.6-macos-x64.dmg"
+    sha256 "a1484098cb64f5a5d9541e497808748c0c459c74280ac912dcf05cd264c60d77"
   else
-    url "https://github.com/abrignoni/ALEAPP/releases/download/v2026.4.5/ALEAPP-2026.4.5-macos-arm64.dmg"
-    sha256 "373709973c6cfe07ee8a9281dff6b82b7f157bbda0c6fa8b1cce99670f776369"
+    url "https://github.com/abrignoni/ALEAPP/releases/download/v2026.4.6/ALEAPP-2026.4.6-macos-arm64.dmg"
+    sha256 "cf755433eaa0f0c50d91d30217797a5dbbca41efb6dafac9b29c50329ea351ba"
   end
 
   name "ALEAPP"
   desc "Digital forensics tool for parsing Android backup files, images, and artifacts"
-  homepage "https://github.com/abrignoni/aLEAPP"
+  homepage "https://github.com/abrignoni/ALEAPP"
 
   app "ALEAPP.app"
   binary "#{appdir}/ALEAPP.app/Contents/MacOS/aleapp"
