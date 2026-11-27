@@ -1,12 +1,12 @@
 cask "ileapp" do
-  version "v2026.4.7"
+  version "v2026.5.0"
 
   if Hardware::CPU.intel?
-    url "https://github.com/abrignoni/iLEAPP/releases/download/v2026.4.7/iLEAPP-2026.4.7-macos-x64.dmg"
-    sha256 "040bd61aeed71b851e907f3dd0ee7c8061a08113aa4391a9162a9b06ad191c6e"
+    url "https://github.com/abrignoni/iLEAPP/releases/download/v2026.5.0/iLEAPP-2026.5.0-macos-x64.dmg"
+    sha256 "4bdbe85e9efe212dce35f443e4106c4378b734caa655cbc03a6422e1379b3e86"
   else
-    url "https://github.com/abrignoni/iLEAPP/releases/download/v2026.4.7/iLEAPP-2026.4.7-macos-arm64.dmg"
-    sha256 "3743f4f5892364fef5fec8c96e52b5930a084b2807c67028effb863bc5c687e7"
+    url "https://github.com/abrignoni/iLEAPP/releases/download/v2026.5.0/iLEAPP-2026.5.0-macos-arm64.dmg"
+    sha256 "1eb313cbe7a211c4770bb710178a6124dc2f2d42c8a81edd2d1d52fac92854c4"
   end
 
   name "iLEAPP"
